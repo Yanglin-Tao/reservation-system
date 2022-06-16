@@ -7,6 +7,14 @@
 </head>
 <body style="background-image:url('images/index_page.jpg'); background-size: cover; background-color: #bfbebe; background-blend-mode: multiply;">
 <h1 class = heading>Staff Register</h1>
-
+<form class = login action="/loginAuth" method="POST">
+    <input type="text" name = "user_name" placeholder="Username" required/> </br>
+    <input type="password" name = "staff_password" placeholder="Password" required/></br>
+    <input type="text" name = "first_name" placeholder="First name" required/> </br>
+    <input type="text" name = "last_name" placeholder="Last name" required/> </br>
+    <input type="text" name = "date_of_birth" placeholder="Date of birth: YYYY-MM-DD" required/> </br>
+    <input type="text" name = "airline_name" placeholder="Airline name" required/> </br>
+    <input type="submit" value = "Register" />
+</form>
 </body>
 </html>
