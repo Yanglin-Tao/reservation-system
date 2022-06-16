@@ -7,12 +7,23 @@
 </head>
 <body style="background-image: url(images/index_page.jpg); background-size: cover; background-color: #bfbebe; background-blend-mode: multiply;">
 <h1 class = heading>Air Ticket Reservation System</h1>
-<p class = center><a class = "button" href="customer_login.html">Customer Login</a></p>
+<form class = action action="/post" method="POST">
+    <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
+    <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/></br>
+    <input type="text" name = "departure_date" placeholder="Departure date: YYYY/MM/DD" required/> &nbsp;
+    <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY/MM/DD" required/></br>
+    <input type="submit" value = "Show all future flights" />
+</form>
+<form class = action action="/post" method="POST">
+    <input type="text" name = "airline_name" placeholder="Departure airport" required/> &nbsp;
+    <input type="text" name = "flight_number" placeholder="Arrival airport" required/></br>
+    <input type="text" name = "departure_date" placeholder="Departure date: YYYY/MM/DD" required/> &nbsp;
+    <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY/MM/DD" required/></br>
+    <input type="submit" value = "Check flight status" />
+</form>
 <br>
-<p class = center><a class = "button" href="customer_register.html">Customer Register</a></p>
+<p class = center><a class = "button" href="customer_login.html">Customer Login</a> &nbsp; <a class = "button" href="customer_register.html">Customer Register</a></p>
 <br>
-<p class = center><a class = "button" href="staff_login.html">Staff Login</a></p>
-<br>
-<p class = center><a class = "button" href="staff_register.html">Staff Register</a></p>
+<p class = center><a class = "button" href="staff_login.html">Staff Login</a> &nbsp; <a class = "button" href="staff_register.html">Staff Register</a></p>
 </body>
 </html>

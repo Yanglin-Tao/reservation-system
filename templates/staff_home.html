@@ -2,9 +2,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Staff Home</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body style="background-image:url('images/index_page.jpg'); background-size: cover; background-color: #bfbebe; background-blend-mode: multiply;">
+<h1 class = heading>Welcome, {{user_name}}</h1>
 
+<form class = action action="/post" method="POST">
+    <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
+    <input type="text" name = "departure_date" placeholder="Departure date" required/> &nbsp;
+    <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
+    <input type="submit" value = "View flights" />
+</form>
+
+<form class = action action="/post" method="POST">
+<input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
+<input type="text" name = "departure_date" placeholder="Departure date" required/> &nbsp;
+<input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
+<input type="submit" value = "Create new flights" />
+</form>
+
+<form class = action action="/post" method="POST">
+    <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
+    <input type="text" name = "departure_date" placeholder="Departure date" required/> </br>
+    <input type="text" name = "airline_name" placeholder="Airline name" required/> &nbsp;
+    <input type="text" name = "flight_status" placeholder="New status" required/> <br>
+    <input type="submit" value = "Change status of the flight" />
+</form>
+
+<form class = action action="/post" method="POST">
+    <input type="text" name = "airplane_identification_number" placeholder="Airplane identification number" required/> &nbsp;
+    <input type="text" name = "number_of_seats" placeholder="Number of seats" required/> </br>
+    <input type="text" name = "manufacture_company" placeholder="Manufacture company" required/> &nbsp;
+    <input type="text" name = "age" placeholder="Age" required/> </br>
+    <input type="text" name = "airline_name" placeholder="airline name" required/> <br>
+    <input type="submit" value = "Add new airplane in the system" />
+</form>
+
+<form class = action action="/post" method="POST">
+    <input type="text" name = "airport_name" placeholder="Airport name" required/> &nbsp;
+    <input type="text" name = "airport_city" placeholder="Airport city" required/> </br>
+    <input type="text" name = "airport_country" placeholder="Airport country" required/> &nbsp;
+    <input type="text" name = "airport_type" placeholder="Airport type" required/> <br>
+    <input type="submit" value = "Add new airport in the system" />
+</form>
+
+<form class = action action="/post" method="POST">
+    <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
+    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
+    <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
+    <input type="submit" value = "View flight ratings" />
+</form>
+
+<form class = action action="/post" method="POST">
+    <input type="submit" value = "View frequent customers" />
+</form>
+
+<form class = action action="/post" method="POST">
+    <input type="submit" value = "View reports" />
+</form>
+
+<form class = action action="/post" method="POST">
+    <input type="submit" value = "View earned revenue" />
+</form>
+<p class = center><a class = "button" href="logout.html">Logout</a></p>
 </body>
 </html>
