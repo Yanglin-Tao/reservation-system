@@ -46,6 +46,7 @@ create table Flight(
    airplane_identification_number numeric(20,0),
    base_price numeric(20,0),
    airline_name varchar(20),
+   flight_status varchar(20),
    primary key(flight_number, departure_date_time, airline_name),
    foreign key(airline_name) references Airline(airline_name),
    foreign key(arrival_airport) references Airport(airport_name),

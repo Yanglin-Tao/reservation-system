@@ -1,0 +1,85 @@
+h1.heading{
+    font-family:Helvetica;
+    text-align:center;
+    font-size: 50px;
+    background-color: rgba(255, 255, 255, 0.6);
+    padding: 10px 10px;
+    margin-left: 4em;
+    margin-right: 4em;
+    color: dimgray;
+}
+
+a.button{
+    border: none;
+    background-color: gray;
+    padding: 15px 10px;
+    font-size: 18px;
+    color: white;
+    text-decoration: none;
+}
+
+p.center{
+    font-family:Helvetica;
+    text-align:center;
+    font-weight: bold;
+}
+
+form.login{
+    text-align:center;
+}
+
+input[type=text], select {
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=password], select {
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=submit] {
+    background-color: gray;
+    color: white;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    padding: 15px 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+input[type=submit]:hover {
+    background-color: dimgray;
+}
+
+p.intro_body{
+    font-family:verdana;
+    padding: 20px 40px;
+    background-color: rgba(255, 255, 255, 0.6);
+    font-size: 20px;
+    margin-left: 10em;
+    margin-right: 10em;
+    border-radius: 5px;
+}
+
+a.button:hover{
+    background-color: dimgray;
+}
+
+div {
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.6);
+    padding: 20px;
+    margin-left: 4em;
+    margin-right: 4em;
+}
+
