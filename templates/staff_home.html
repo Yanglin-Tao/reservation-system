@@ -17,29 +17,29 @@
     <th>Arrival airport</th>
     <th>Customers</th>
 </table>
-<form class = action action="/post" method="POST">
+<form class = action action="/staff_view_flights" method="POST">
     <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
     <input type="text" name = "departure_date" placeholder="Departure date" required/> &nbsp;
     <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
     <input type="submit" value = "View flights" />
 </form>
 
-<form class = action action="/post" method="POST">
+<form class = action action="/staff_create_flight" method="POST">
 <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
-<input type="text" name = "departure_date" placeholder="Departure date" required/> &nbsp;
+<input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
 <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
 <input type="submit" value = "Create new flights" />
 </form>
 
-<form class = action action="/post" method="POST">
+<form class = action action="/change_status" method="POST">
     <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
-    <input type="text" name = "departure_date" placeholder="Departure date" required/> </br>
+    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> </br>
     <input type="text" name = "airline_name" placeholder="Airline name" required/> &nbsp;
     <input type="text" name = "flight_status" placeholder="New status" required/> <br>
     <input type="submit" value = "Change status of the flight" />
 </form>
 
-<form class = action action="/post" method="POST">
+<form class = action action="/add_airplane" method="POST">
     <input type="text" name = "airplane_identification_number" placeholder="Airplane identification number" required/> &nbsp;
     <input type="text" name = "number_of_seats" placeholder="Number of seats" required/> </br>
     <input type="text" name = "manufacture_company" placeholder="Manufacture company" required/> &nbsp;
@@ -48,7 +48,7 @@
     <input type="submit" value = "Add new airplane in the system" />
 </form>
 
-<form class = action action="/post" method="POST">
+<form class = action action="/add_airport" method="POST">
     <input type="text" name = "airport_name" placeholder="Airport name" required/> &nbsp;
     <input type="text" name = "airport_city" placeholder="Airport city" required/> </br>
     <input type="text" name = "airport_country" placeholder="Airport country" required/> &nbsp;
@@ -63,7 +63,7 @@
 <table>
     <th>Average rating</th>
 </table>
-<form class = action action="/post" method="POST">
+<form class = action action="/view_rating" method="POST">
     <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
     <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
     <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
@@ -72,7 +72,7 @@
 <table>
     <th>Most frequent customer within the last year</th>
 </table>
-<form class = action action="/post" method="POST">
+<form class = action action="/frequent_customer" method="POST">
     <input type="submit" value = "View frequent customer" />
 </form>
 <table>
@@ -81,7 +81,7 @@
     <th>Departure time</th>
     <th>Airline name</th>
 </table>
-<form class = action action="/post" method="POST">
+<form class = action action="/view_customer_flights" method="POST">
     <input type="text" name = "customer_email" placeholder="Customer email" required/> <br>
     <input type="submit" value = "View all flights of this customer" />
 </form>
@@ -90,7 +90,7 @@
     <th>Tickets sold</th>
 </table>
 
-<form class = action action="/post" method="POST">
+<form class = action action="/view_reports" method="POST">
     <input type="submit" value = "View reports" />
 </form>
 
@@ -99,9 +99,12 @@
     <th>Total revenue</th>
 </table>
 
-<form class = action action="/post" method="POST">
+<form class = action action="/view_revenue" method="POST">
     <input type="submit" value = "View earned revenue" />
 </form>
-<p class = center><a class = "button" href="customer_logout.html">Logout</a></p>
+
+<form class = action action="/staff_logout" method="POST">
+    <input type="submit" value = "Logout" />
+</form>
 </body>
 </html>

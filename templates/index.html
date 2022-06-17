@@ -7,18 +7,34 @@
 </head>
 <body style="background-image: url(images/index_page.jpg); background-size: cover; background-color: #bfbebe; background-blend-mode: multiply;">
 <h1 class = heading>Air Ticket Reservation System</h1>
+<table>
+    <th>Flight number</th>
+    <th>Departure date</th>
+    <th>Departure time</th>
+    <th>Departure airport</th>
+    <th>Arrival date</th>
+    <th>Arrival time</th>
+    <th>Arrival airport</th>
+</table>
 <form class = action action="/post" method="POST">
     <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
     <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/></br>
-    <input type="text" name = "departure_date" placeholder="Departure date: YYYY/MM/DD" required/> &nbsp;
-    <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY/MM/DD" required/></br>
+    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
+    <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/></br>
     <input type="submit" value = "Show all future flights" />
 </form>
+<table>
+    <th>Airline name</th>
+    <th>Flight number</th>
+    <th>Departure date</th>
+    <th>Arrival date</th>
+    <th>Flight status</th>
+</table>
 <form class = action action="/post" method="POST">
-    <input type="text" name = "airline_name" placeholder="Departure airport" required/> &nbsp;
-    <input type="text" name = "flight_number" placeholder="Arrival airport" required/></br>
-    <input type="text" name = "departure_date" placeholder="Departure date: YYYY/MM/DD" required/> &nbsp;
-    <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY/MM/DD" required/></br>
+    <input type="text" name = "airline_name" placeholder="Airline name" required/> &nbsp;
+    <input type="text" name = "flight_number" placeholder="Flight number" required/></br>
+    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
+    <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/></br>
     <input type="submit" value = "Check flight status" />
 </form>
 <br>

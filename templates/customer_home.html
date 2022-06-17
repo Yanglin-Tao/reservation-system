@@ -14,7 +14,7 @@
     <th>Arrival date</th>
     <th>Arrival airport</th>
 </table>
-<form class = action action="/post" method="POST">
+<form class = action action="/customer_home" method="POST">
     <input type="submit" value = "View my flights" />
 </form>
 <table>
@@ -24,27 +24,41 @@
     <th>Arrival date</th>
     <th>Arrival airport</th>
 </table>
-<form class = action action="/post" method="POST">
+<form class = action action="/customer_search_flights" method="POST">
     <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
     <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> <br>
     <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
     <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
     <input type="submit" value = "Search for flights" /> &nbsp;
     <input type="submit" value = "Purchase tickets" /> &nbsp;
-    <input type="submit" value = "Cancel trip" />
 </form>
-<form class = action action="/post" method="POST">
+
+<form class = action action="/cancel_trip" method="POST">
+    <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
+    <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> <br>
+    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
+    <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
+    <input type="submit" value = "Cancel my trip" />
+</form>
+
+<form class = action action="/customer_rating" method="POST">
+    <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
+    <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> <br>
+    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
+    <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
     <input type="text" name = "rating" placeholder="Rating" required/> <br>
     <input type="text" name = "comment" placeholder="Comment" required/> <br>
-    <input type="submit" value = "Give ratings and comments " />
+    <input type="submit" value = "Rate and comment my trip" />
 </form>
 <table>
     <th>Date</th>
     <th>Money spent</th>
 </table>
-<form class = action action="/post" method="POST">
+<form class = action action="/track_spending" method="POST">
     <input type="submit" value = "Track my spending" />
 </form>
-<p class = center><a class = "button" href="customer_logout.html">Logout</a></p>
+<form class = action action="/customer_logout" method="POST">
+    <input type="submit" value = "Logout" />
+</form>
 </body>
 </html>

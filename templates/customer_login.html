@@ -7,10 +7,13 @@
 </head>
 <body style="background-image:url('images/index_page.jpg'); background-size: cover; background-color: #bfbebe; background-blend-mode: multiply;">
 <h1 class = heading>Customer Login</h1>
-<form class = login action="/loginAuth" method="POST">
+<form class = login action="/customer_login_auth" method="POST">
     <input type="text" name = "customer_email" placeholder="Email" required/> </br>
     <input type="password" name = "customer_password" placeholder="Password" required/></br>
     <input type="submit" value = Login />
+    {% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
 </form>
 <p class = center><a class = "button" href="index.html">Go Back</a></p>
 </body>
