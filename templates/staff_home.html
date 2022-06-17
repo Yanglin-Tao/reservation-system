@@ -7,7 +7,16 @@
 </head>
 <body style="background-image:url('images/index_page.jpg'); background-size: cover; background-color: #bfbebe; background-blend-mode: multiply;">
 <h1 class = heading>Welcome, {{user_name}}</h1>
-
+<table>
+    <th>Flight number</th>
+    <th>Departure date</th>
+    <th>Departure time</th>
+    <th>Departure airport</th>
+    <th>Arrival date</th>
+    <th>Arrival time</th>
+    <th>Arrival airport</th>
+    <th>Customers</th>
+</table>
 <form class = action action="/post" method="POST">
     <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
     <input type="text" name = "departure_date" placeholder="Departure date" required/> &nbsp;
@@ -46,25 +55,53 @@
     <input type="text" name = "airport_type" placeholder="Airport type" required/> <br>
     <input type="submit" value = "Add new airport in the system" />
 </form>
-
+<table>
+    <th>Rating</th>
+    <th>Comment</th>
+</table>
+<br>
+<table>
+    <th>Average rating</th>
+</table>
 <form class = action action="/post" method="POST">
     <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
     <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
     <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
     <input type="submit" value = "View flight ratings" />
 </form>
-
+<table>
+    <th>Most frequent customer within the last year</th>
+</table>
 <form class = action action="/post" method="POST">
-    <input type="submit" value = "View frequent customers" />
+    <input type="submit" value = "View frequent customer" />
 </form>
+<table>
+    <th>Flight number</th>
+    <th>Departure date</th>
+    <th>Departure time</th>
+    <th>Airline name</th>
+</table>
+<form class = action action="/post" method="POST">
+    <input type="text" name = "customer_email" placeholder="Customer email" required/> <br>
+    <input type="submit" value = "View all flights of this customer" />
+</form>
+<table>
+    <th>Date range</th>
+    <th>Tickets sold</th>
+</table>
 
 <form class = action action="/post" method="POST">
     <input type="submit" value = "View reports" />
 </form>
 
+<table>
+    <th>Date Range</th>
+    <th>Total revenue</th>
+</table>
+
 <form class = action action="/post" method="POST">
     <input type="submit" value = "View earned revenue" />
 </form>
-<p class = center><a class = "button" href="logout.html">Logout</a></p>
+<p class = center><a class = "button" href="customer_logout.html">Logout</a></p>
 </body>
 </html>

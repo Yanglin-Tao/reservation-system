@@ -7,24 +7,29 @@
 </head>
 <body style="background-image:url('images/index_page.jpg'); background-size: cover; background-color: #bfbebe; background-blend-mode: multiply;">
 <h1 class = heading>Welcome, {{customer_name}}</h1>
+<table>
+    <th>Flight number</th>
+    <th>Departure date</th>
+    <th>Departure airport</th>
+    <th>Arrival date</th>
+    <th>Arrival airport</th>
+</table>
 <form class = action action="/post" method="POST">
     <input type="submit" value = "View my flights" />
 </form>
-
 <table>
     <th>Flight number</th>
-    <th>Departure date/time</th>
+    <th>Departure date</th>
     <th>Departure airport</th>
-    <th>Arrival date/time</th>
+    <th>Arrival date</th>
     <th>Arrival airport</th>
 </table>
-
 <form class = action action="/post" method="POST">
     <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
     <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> <br>
     <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
     <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
-    <input type="submit" value = "Search for flights" />
+    <input type="submit" value = "Search for flights" /> &nbsp;
     <input type="submit" value = "Purchase tickets" /> &nbsp;
     <input type="submit" value = "Cancel trip" />
 </form>
@@ -33,9 +38,13 @@
     <input type="text" name = "comment" placeholder="Comment" required/> <br>
     <input type="submit" value = "Give ratings and comments " />
 </form>
+<table>
+    <th>Date</th>
+    <th>Money spent</th>
+</table>
 <form class = action action="/post" method="POST">
     <input type="submit" value = "Track my spending" />
 </form>
-<p class = center><a class = "button" href="logout.html">Logout</a></p>
+<p class = center><a class = "button" href="customer_logout.html">Logout</a></p>
 </body>
 </html>
