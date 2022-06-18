@@ -113,42 +113,85 @@ def cancel_trip():
 
 #TODO: Customer gives rating and comment
 #Author: Yanglin Tao
+'''
+Customer will be able to rate and comment on their 
+previous flights (for which he/she purchased tickets and already took that flight) for the airline they 
+logged in.
+'''
+# input: flight_number, departure date, departure time, airline name
+# output: none
 @app.route('customer_rating')
 def customer_rating():
 	pass
 
 #TODO: Customer tracks spending
 #Author: Yanglin Tao
+'''
+Default view will be total amount of money spent in the past year and a bar
+chart/table showing month wise money spent for last 6 months. He/she will also have option to specify 
+a range of dates to view total amount of money spent within that range and a bar chart/table showing 
+month wise money spent within that range
+'''
+# input: start_date, end_date
+# output: total_spending, monthly_spending
 @app.route('track_spending')
 def track_spending():
 	pass
 
 #TODO: Customer logout
 #Author: Yanglin Tao
+'''
+Customer logs out of the system
+'''
+# input: none
+# output: none
 @app.route('customer_logout')
 def customer_logout():
 	pass
 
 #TODO: Staff views flights
 #Author: Yanglin Tao
+'''
+Defaults will be showing all the future flights operated by the airline he/she works for 
+the next 30 days. He/she will be able to see all the current/future/past flights operated by the airline 
+he/she works for based range of dates, source/destination airports/city etc. He/she will be able to see 
+all the customers of a particular flight.
+'''
+# input: 
+# output:
 @app.route('staff_view_flights')
 def staff_view_flights():
 	pass
 
 #TODO: Staff creates new flights
 #Author: Yanglin Tao
+'''
+
+'''
+# input: 
+# output:
 @app.route('staff_create_flight')
 def create_flight():
 	pass
 
 #TODO: Staff changes status of the flight
 #Author: Yanglin Tao
+'''
+
+'''
+# input: 
+# output:
 @app.route('change_status')
 def change_status():
 	pass
 
 #TODO: Staff adds new airplane in the system
 #Author: Yanglin Tao
+'''
+
+'''
+# input: 
+# output:
 @app.route('add_airplane')
 def add_airplane():
 	pass
