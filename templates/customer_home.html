@@ -51,10 +51,16 @@
     <input type="submit" value = "Rate and comment my trip" />
 </form>
 <table>
+    <th>Total spending last year</th>
+</table>
+<br>
+<table>
     <th>Date</th>
     <th>Money spent</th>
 </table>
 <form class = action action="/track_spending" method="POST">
+    <input type="text" name = "start_date" placeholder="From: YYYY-MM-DD" required/> &nbsp;
+    <input type="text" name = "end_date" placeholder="To: YYYY-MM-DD" required/> <br>
     <input type="submit" value = "Track my spending" />
 </form>
 <form class = action action="/customer_logout" method="POST">

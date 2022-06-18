@@ -18,33 +18,52 @@
     <th>Customers</th>
 </table>
 <form class = action action="/staff_view_flights" method="POST">
-    <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
-    <input type="text" name = "departure_date" placeholder="Departure date" required/> &nbsp;
-    <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
+    <input type="text" name = "departure_airport" placeholder="Departure airport"/> &nbsp;
+    <input type="text" name = "departure_city" placeholder="Departure city"/> <br>
+    <input type="text" name = "arrival_airport" placeholder="Arrival airport"/> &nbsp;
+    <input type="text" name = "arrival_city" placeholder="Arrival city"/> <br>
+    <input type="text" name = "start_date" placeholder="From: YYYY-MM-DD"/> &nbsp;
+    <input type="text" name = "end_date" placeholder="To: YYYY-MM-DD"/> <br>
     <input type="submit" value = "View flights" />
 </form>
 
 <form class = action action="/staff_create_flight" method="POST">
-<input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
-<input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
-<input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
-<input type="submit" value = "Create new flights" />
+    <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
+    <input type="text" name = "departure_airport" placeholder="Departure airport" required/> <br>
+    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
+    <input type="text" name = "departure_time" placeholder="Departure time: hh:mm:ss" required/> <br>
+    <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> &nbsp;
+    <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
+    <input type="text" name = "arrival_time" placeholder="Arrival time: hh:mm:ss" required/> &nbsp;
+    <input type="text" name = "airplane_identification_number" placeholder="Airplane identification number" required/>
+    <br>
+    <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
+    <input type="submit" value = "Create new flights" />
 </form>
 
 <form class = action action="/change_status" method="POST">
     <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
     <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> </br>
-    <input type="text" name = "airline_name" placeholder="Airline name" required/> &nbsp;
+    <input type="text" name = "departure_time" placeholder="Departure time: hh:mm:ss" required/> &nbsp;
+    <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
     <input type="text" name = "flight_status" placeholder="New status" required/> <br>
     <input type="submit" value = "Change status of the flight" />
 </form>
+
+<table>
+    <th>Airplane identification number</th>
+    <th>Number of seats</th>
+    <th>Manufacture company</th>
+    <th>Age</th>
+    <th>Airline name</th>
+</table>
 
 <form class = action action="/add_airplane" method="POST">
     <input type="text" name = "airplane_identification_number" placeholder="Airplane identification number" required/> &nbsp;
     <input type="text" name = "number_of_seats" placeholder="Number of seats" required/> </br>
     <input type="text" name = "manufacture_company" placeholder="Manufacture company" required/> &nbsp;
     <input type="text" name = "age" placeholder="Age" required/> </br>
-    <input type="text" name = "airline_name" placeholder="airline name" required/> <br>
+    <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
     <input type="submit" value = "Add new airplane in the system" />
 </form>
 
@@ -65,7 +84,8 @@
 </table>
 <form class = action action="/view_rating" method="POST">
     <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
-    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
+    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> <br>
+    <input type="text" name = "departure_time" placeholder="Departure time: hh:mm:ss" required/> &nbsp;
     <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
     <input type="submit" value = "View flight ratings" />
 </form>
@@ -79,7 +99,10 @@
     <th>Flight number</th>
     <th>Departure date</th>
     <th>Departure time</th>
-    <th>Airline name</th>
+    <th>Departure airport</th>
+    <th>Arrival date</th>
+    <th>Arrival time</th>
+    <th>Arrival airport</th>
 </table>
 <form class = action action="/view_customer_flights" method="POST">
     <input type="text" name = "customer_email" placeholder="Customer email" required/> <br>

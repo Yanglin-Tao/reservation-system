@@ -8,35 +8,41 @@ app = Flask(__name__)
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password='',
-                       db='Project1',
+                       db='system',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
+#Author: Yanglin Tao
 @app.route('/')
 def hello():
 	return render_template('index.html')
 
 #Define route for customer login
+#Author: Yanglin Tao
 @app.route('/customer_login')
 def customer_login():
 	return render_template('customer_login.html')
 
 #Define route for customer register
+#Author: Yanglin Tao
 @app.route('/customer_register')
 def customer_register():
 	return render_template('customer_register.html')
 
 #Define route for staff login
+#Author: Yanglin Tao
 @app.route('/staff_login')
 def staff_login():
 	return render_template('staff_login.html')
 
 #Define route for staff register
+#Author: Yanglin Tao
 @app.route('/staff_register')
 def staff_register():
 	return render_template('staff_register.html')
 
 #Authenticates customer login
+#Author: Yanglin Tao
 @app.route('/customer_login_auth', methods=['GET', 'POST'])
 def customer_login_auth():
 	#grabs information from the forms
@@ -95,19 +101,19 @@ destination city/airport name, dates (departure or return).
 '''
 # Input: departure airport, arrival airport, daparture date, arrival date
 # Output: flight_number, departure_airport, departure date, arrival date, arrival airport
-@app.route('customer_search_flights')
+@app.route('customer_search_flights', methods=['GET', 'POST'])
 def customer_search_flights():
 	pass
 
 #TODO: Customer purchases a ticket (from result of searching flight)
 #Author: Tianzuo Liu
-@app.route('customer_search_flights')
+@app.route('customer_search_flights', methods=['GET', 'POST'])
 def purchase_ticket():
 	pass
 
 #TODO: Customer cancels a trip
 #Author: Tianzuo Liu
-@app.route('cancel_trip')
+@app.route('cancel_trip', methods=['GET', 'POST'])
 def cancel_trip():
 	pass
 
@@ -120,7 +126,7 @@ logged in.
 '''
 # input: flight_number, departure date, departure time, airline name
 # output: none
-@app.route('customer_rating')
+@app.route('customer_rating', methods=['GET', 'POST'])
 def customer_rating():
 	pass
 
@@ -132,9 +138,10 @@ chart/table showing month wise money spent for last 6 months. He/she will also h
 a range of dates to view total amount of money spent within that range and a bar chart/table showing 
 month wise money spent within that range
 '''
+# default output: total_last_year, monthly_spending_last_year
 # input: start_date, end_date
 # output: total_spending, monthly_spending
-@app.route('track_spending')
+@app.route('track_spending', methods=['GET', 'POST'])
 def track_spending():
 	pass
 
@@ -157,30 +164,53 @@ the next 30 days. He/she will be able to see all the current/future/past flights
 he/she works for based range of dates, source/destination airports/city etc. He/she will be able to see 
 all the customers of a particular flight.
 '''
-# input: 
-# output:
-@app.route('staff_view_flights')
+# default output: next_30day_flights(flight_number, departure_date, departure_time, departure_airport, arrival_date, 
+# 			arrival_time, arrival_airport, customers)
+# input: start_date, end_date, departure_airport, departure_city, arrival_airport, arrival_city
+# output: flight_number, departure_date, departure_time, departure_airport, arrival_date, 
+# 			arrival_time, arrival_airport, customers
+@app.route('staff_view_flights', methods=['GET', 'POST'])
 def staff_view_flights():
 	pass
 
 #TODO: Staff creates new flights
 #Author: Yanglin Tao
 '''
-
+He or she creates a new flight, providing all the needed data, via forms. The 
+application should prevent unauthorized users from doing this action. Defaults will be showing all the 
+future flights operated by the airline he/she works for the next 30 days.
 '''
-# input: 
-# output:
-@app.route('staff_create_flight')
+# default output: next_30day_flights(flight_number, departure_date, departure_time, departure_airport, arrival_date, 
+# 			arrival_time, arrival_airport)
+# input: flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, 
+# 			arrival_time, airplane_identification_number, airline_name
+# output: none
+@app.route('add_flight', methods=['GET', 'POST'])
 def create_flight():
-	pass
+	cursor = conn.cursor();
+	flight_number = request.form['flight_number']
+	departure_airport = request.form['departure_airport']
+	departure_date = request.form['departure_date']
+	departure_time = request.form['departure_time']
+	arrival_airport = request.form['arrival_airport']
+	arrival_date = request.form['arrival_date']
+	arrival_time = request.form['arrival_time']
+	airplane_identification_number = request.form['airplane_identification_number']
+	airline_name = request.form['airline_name']
+	query = 'INSERT INTO Flight (flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, arrival_time, airplane_identification_number, airline_name) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+	cursor.execute(query, (flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, arrival_time, airplane_identification_number, airline_name))
+	conn.commit()
+	cursor.close()
+	return redirect(url_for('customer_home'))
 
 #TODO: Staff changes status of the flight
 #Author: Yanglin Tao
 '''
-
+He or she changes a flight status (from on-time to delayed or vice versa) via 
+forms.
 '''
-# input: 
-# output:
+# input: flight_number, departure_date, departure_time, airline_name, status
+# output: none
 @app.route('change_status')
 def change_status():
 	pass
@@ -188,13 +218,27 @@ def change_status():
 #TODO: Staff adds new airplane in the system
 #Author: Yanglin Tao
 '''
-
+He or she adds a new airplane, providing all the needed data, via forms. 
+The application should prevent unauthorized users from doing this action. In the confirmation page, 
+she/he will be able to see all the airplanes owned by the airline he/she works for.
 '''
-# input: 
-# output:
+# default output: all_airplanes(airplane_identification_number, number_of_seats, manufacture_company, age, airline_name)
+# input: airplane_identification_number, number_of_seats, manufacture_company, age, airline_name
+# output: none
 @app.route('add_airplane')
 def add_airplane():
-	pass
+	cursor = conn.cursor();
+	airplane_identification_number = request.form['airplane_identification_number']
+	number_of_seats = request.form['number_of_seats']
+	manufacture_company = request.form['manufacture_company']
+	age = request.form['airline_name']
+	airline_name = request.form['airline_name']
+	query = 'INSERT INTO Airplane (airplane_identification_number, number_of_seats, manufacture_company, age, airline_name) VALUES (%s, %s, %s, %s, %s)'
+	cursor.execute(query, (airplane_identification_number, number_of_seats, manufacture_company, age, airline_name))
+	conn.commit()
+	cursor.close()
+	return redirect(url_for('customer_home'))
+
 
 #TODO: Staff adds new airport in the system
 #Author: Justin Li
