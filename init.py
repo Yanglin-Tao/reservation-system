@@ -130,7 +130,19 @@ logged in.
 # output: none
 @app.route('customer_rating', methods=['GET', 'POST'])
 def customer_rating():
-	pass
+	cursor = conn.cursor();
+	flight_num = request.form['flight_number']
+	dept_date = request.form['departure_date']
+	dept_time = request.form['departure_time']
+	airline = request.form['airline_name']
+	rate = request.form['rating']
+	comm = request.form['comment']
+	query = 'INSERT INTO Take (rating, comment) VALUES (%s, %s) WHERE flight_number = %s AND departure_date = %s AND \
+		departure_time = %s AND airline_name = %s'
+	cursor.execute(query, (rate, comm, flight_num, dept_date, dept_time, airline))
+	conn.commit()
+	cursor.close()
+	return redirect(url_for('customer_home'))
 
 #TODO: Customer tracks spending
 #Author: Yanglin Tao
@@ -145,7 +157,25 @@ month wise money spent within that range
 # output: total_spending, monthly_spending
 @app.route('track_spending', methods=['GET', 'POST'])
 def track_spending():
-	pass
+	cursor = conn.cursor();
+	email = session['customer_email']
+	start = request.form['start_date']
+	end = request.form['end_date']
+	query1 = 'SELECT SUM(sold_price) FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
+		purchase_date >= NOW() - 1 YEAR AND purchase_date <= NOW()'
+	cursor.execute(query1, (email))
+	conn.commit()
+	query2 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
+		purchase_date >= NOW() - 6 MONTH AND purchase_date <= NOW()'
+	cursor.execute(query2, (email))
+	conn.commit()
+	if start != None and end != None:
+		query2 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
+		purchase_date >= %s AND purchase_date <= %s'
+		cursor.execute(query2, (email, start, end))
+		conn.commit()
+	cursor.close()
+	return redirect(url_for('customer_home'))
 
 #TODO: Customer logout
 #Author: Yanglin Tao
@@ -156,7 +186,8 @@ Customer logs out of the system
 # output: none
 @app.route('customer_logout')
 def customer_logout():
-	pass
+	session.pop('customer_email')
+	return redirect('/')
 
 #TODO: Staff views flights
 #Author: Yanglin Tao
@@ -196,7 +227,7 @@ def staff_view_flights():
 		cursor.execute(query, (start, end, dept_airport, dept_city, arri_airport, arri_city))
 		conn.commit()
 	cursor.close()
-	return redirect(url_for('customer_home'))
+	return redirect(url_for('staff_home'))
 
 #TODO: Staff creates new flights
 #Author: Yanglin Tao
@@ -226,7 +257,7 @@ def create_flight():
 	cursor.execute(query, (flight_num, dept_airport, dept_date, dept_time, arri_airport, arri_date, arri_time, airplane_identifi_num, airline))
 	conn.commit()
 	cursor.close()
-	return redirect(url_for('customer_home'))
+	return redirect(url_for('staff_home'))
 
 #TODO: Staff changes status of the flight
 #Author: Yanglin Tao
@@ -244,11 +275,11 @@ def change_status():
 	dept_time = request.form['departure_time']
 	airline = request.form['airline_name']
 	new_status = request.form['flight_status']
-	query = 'INSERT INTO Flight (flight_status) VALUES (new_status) WHERE flight_number = flight_num AND departure_date = dept_date AND departure_time = dept_time AND airline_name = airline' 
-	cursor.execute(query, (flight_num, dept_date, dept_time, airline, new_status))
+	query = 'INSERT INTO Flight (flight_status) VALUES (%s) WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s' 
+	cursor.execute(query, (new_status, flight_num, dept_date, dept_time, airline))
 	conn.commit()
 	cursor.close()
-	return redirect(url_for('customer_home'))
+	return redirect(url_for('staff_home'))
 
 #TODO: Staff adds new airplane in the system
 #Author: Yanglin Tao
@@ -272,7 +303,7 @@ def add_airplane():
 	cursor.execute(query, (airplane_identifi_num, num_of_seats, manufact_comp, airplane_age, airline))
 	conn.commit()
 	cursor.close()
-	return redirect(url_for('customer_home'))
+	return redirect(url_for('staff_home'))
 
 #################################################################################################################
 
