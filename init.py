@@ -117,6 +117,8 @@ def purchase_ticket():
 def cancel_trip():
 	pass
 
+#################################################################################################################
+
 #TODO: Customer gives rating and comment
 #Author: Yanglin Tao
 '''
@@ -171,7 +173,30 @@ all the customers of a particular flight.
 # 			arrival_time, arrival_airport, customers
 @app.route('staff_view_flights', methods=['GET', 'POST'])
 def staff_view_flights():
-	pass
+	cursor = conn.cursor();
+	start = request.form['start_date']
+	end = request.form['end_date']
+	dept_airport = request.form['departure_airport']
+	dept_city = request.form['departure_city']
+	arri_airport = request.form['arrival_airport']
+	arri_city = request.form['arrival_city']
+	query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time,\
+			 arrival_airport, customer_email FROM Ticket NATURAL JOIN Customer WHERE departure_date >= NOW() DAY AND \
+				departure_date <= DATE(NOW()) + 30 DAY'
+	cursor.execute(query)
+	conn.commit()
+	# if there are inputs from user that specifies astart_date, end_date, departure_airport, departure_city, 
+	# arrival_airport, and arrival_city
+	if start != None and end != None and dept_airport != None and dept_city != None and arri_airport != None and \
+		arri_city != None:
+		query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time,\
+			 arrival_airport, customer_email FROM Ticket NATURAL JOIN Customer WHERE departure_date > %s AND departure_date < %s \
+				AND departure_airport = %s AND departure_city = %s AND arrival_airport = %s AND \
+				arrival_city = %s'
+		cursor.execute(query, (start, end, dept_airport, dept_city, arri_airport, arri_city))
+		conn.commit()
+	cursor.close()
+	return redirect(url_for('customer_home'))
 
 #TODO: Staff creates new flights
 #Author: Yanglin Tao
@@ -188,17 +213,17 @@ future flights operated by the airline he/she works for the next 30 days.
 @app.route('add_flight', methods=['GET', 'POST'])
 def create_flight():
 	cursor = conn.cursor();
-	flight_number = request.form['flight_number']
-	departure_airport = request.form['departure_airport']
-	departure_date = request.form['departure_date']
-	departure_time = request.form['departure_time']
-	arrival_airport = request.form['arrival_airport']
-	arrival_date = request.form['arrival_date']
-	arrival_time = request.form['arrival_time']
-	airplane_identification_number = request.form['airplane_identification_number']
-	airline_name = request.form['airline_name']
+	flight_num = request.form['flight_number']
+	dept_airport = request.form['departure_airport']
+	dept_date = request.form['departure_date']
+	dept_time = request.form['departure_time']
+	arri_airport = request.form['arrival_airport']
+	arri_date = request.form['arrival_date']
+	arri_time = request.form['arrival_time']
+	airplane_identifi_num = request.form['airplane_identification_number']
+	airline = request.form['airline_name']
 	query = 'INSERT INTO Flight (flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, arrival_time, airplane_identification_number, airline_name) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
-	cursor.execute(query, (flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, arrival_time, airplane_identification_number, airline_name))
+	cursor.execute(query, (flight_num, dept_airport, dept_date, dept_time, arri_airport, arri_date, arri_time, airplane_identifi_num, airline))
 	conn.commit()
 	cursor.close()
 	return redirect(url_for('customer_home'))
@@ -211,9 +236,19 @@ forms.
 '''
 # input: flight_number, departure_date, departure_time, airline_name, status
 # output: none
-@app.route('change_status')
+@app.route('change_status', methods=['GET', 'POST'])
 def change_status():
-	pass
+	cursor = conn.cursor();
+	flight_num = request.form['flight_number']
+	dept_date = request.form['departure_date']
+	dept_time = request.form['departure_time']
+	airline = request.form['airline_name']
+	new_status = request.form['flight_status']
+	query = 'INSERT INTO Flight (flight_status) VALUES (new_status) WHERE flight_number = flight_num AND departure_date = dept_date AND departure_time = dept_time AND airline_name = airline' 
+	cursor.execute(query, (flight_num, dept_date, dept_time, airline, new_status))
+	conn.commit()
+	cursor.close()
+	return redirect(url_for('customer_home'))
 
 #TODO: Staff adds new airplane in the system
 #Author: Yanglin Tao
@@ -225,24 +260,25 @@ she/he will be able to see all the airplanes owned by the airline he/she works f
 # default output: all_airplanes(airplane_identification_number, number_of_seats, manufacture_company, age, airline_name)
 # input: airplane_identification_number, number_of_seats, manufacture_company, age, airline_name
 # output: none
-@app.route('add_airplane')
+@app.route('add_airplane', methods=['GET', 'POST'])
 def add_airplane():
 	cursor = conn.cursor();
-	airplane_identification_number = request.form['airplane_identification_number']
-	number_of_seats = request.form['number_of_seats']
-	manufacture_company = request.form['manufacture_company']
-	age = request.form['airline_name']
-	airline_name = request.form['airline_name']
+	airplane_identifi_num = request.form['airplane_identification_number']
+	num_of_seats = request.form['number_of_seats']
+	manufact_comp = request.form['manufacture_company']
+	airplane_age = request.form['age']
+	airline = request.form['airline_name']
 	query = 'INSERT INTO Airplane (airplane_identification_number, number_of_seats, manufacture_company, age, airline_name) VALUES (%s, %s, %s, %s, %s)'
-	cursor.execute(query, (airplane_identification_number, number_of_seats, manufacture_company, age, airline_name))
+	cursor.execute(query, (airplane_identifi_num, num_of_seats, manufact_comp, airplane_age, airline))
 	conn.commit()
 	cursor.close()
 	return redirect(url_for('customer_home'))
 
+#################################################################################################################
 
 #TODO: Staff adds new airport in the system
 #Author: Justin Li
-@app.route('add_airport')
+@app.route('add_airport', methods=['GET', 'POST'])
 def add_airport():
 	pass
 
