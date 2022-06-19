@@ -117,6 +117,7 @@ def purchase_ticket():
 @app.route('cancel_trip', methods=['GET', 'POST'])
 def cancel_trip():
 	pass
+
 #################################################################################################################
 
 #TODO: Customer gives rating and comment
