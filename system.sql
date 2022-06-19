@@ -40,14 +40,16 @@ create table Airport(
 create table Flight(
    flight_number numeric(20,0),
    departure_airport varchar(20),
-   departure_date_time timestamp,
+   departure_date date,
+   departure_time time,
    arrival_airport varchar(20),
-   arrival_date_time timestamp,
+   arrival_date date,
+   arrival_time time,
    airplane_identification_number numeric(20,0),
    base_price numeric(20,0),
    airline_name varchar(20),
    flight_status varchar(20),
-   primary key(flight_number, departure_date_time, airline_name),
+   primary key(flight_number, departure_date, departure_time, airline_name),
    foreign key(airline_name) references Airline(airline_name),
    foreign key(arrival_airport) references Airport(airport_name),
    foreign key(departure_airport) references Airport(airport_name),
@@ -62,13 +64,15 @@ create table Ticket(
    card_number numeric(20,0),
    name_on_card varchar(20),
    expiration_date date,
-   purchase_date_time timestamp,
-   departure_date_time timestamp,
+   purchase_date date,
+   purchase_time time,
+   departure_date date,
+   departure_time time,
    flight_number numeric(20,0),
    airline_name varchar(20),
    primary key(ticket_ID),
    foreign key(customer_email) references Customer(customer_email),
-   foreign key(flight_number, departure_date_time, airline_name) references Flight(flight_number, departure_date_time, airline_name)
+   foreign key(flight_number, departure_date, departure_time, airline_name) references Flight(flight_number, departure_date, departure_time, airline_name)
 );
  
 create table Purchase(
