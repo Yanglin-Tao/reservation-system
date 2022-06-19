@@ -16,6 +16,18 @@
     <th>Arrival time</th>
     <th>Arrival airport</th>
     <th>Customers</th>
+    {% for line in flights %}
+        <tr>
+            <td>{{line['flight_number']}}</td>
+            <td>{{line['departure_date']}}</td>
+            <td>{{line['departure_time']}}</td>
+            <td>{{line['departure_airport']}}</td>
+            <td>{{line['arrival_date']}}</td>
+            <td>{{line['arrival_time']}}</td>
+            <td>{{line['arrival_airport']}}</td>
+            <td>{{line['customer_email']}}</td>
+        </tr>
+    {% endfor %}
 </table>
 <form class = action action="/staff_view_flights" method="POST">
     <input type="text" name = "departure_airport" placeholder="Departure airport"/> &nbsp;
@@ -56,6 +68,15 @@
     <th>Manufacture company</th>
     <th>Age</th>
     <th>Airline name</th>
+    {% for line in airplanes %}
+        <tr>
+            <td>{{line['airplane_identification_number']}}</td>
+            <td>{{line['number_of_seats']}}</td>
+            <td>{{line['manufacture_company']}}</td>
+            <td>{{line['age']}}</td>
+            <td>{{line['airline_name']}}</td>
+        </tr>
+    {% endfor %}
 </table>
 
 <form class = action action="/add_airplane" method="POST">
@@ -77,6 +98,12 @@
 <table>
     <th>Rating</th>
     <th>Comment</th>
+    {% for line in ratings %}
+        <tr>
+            <td>{{line['rating']}}</td>
+            <td>{{line['comment']}}</td>
+        </tr>
+    {% endfor %}
 </table>
 <br>
 <table>

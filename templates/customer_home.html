@@ -52,11 +52,21 @@
 </form>
 <table>
     <th>Total spending last year</th>
+    <tr>
+        <td>total_last_year</td>
+    </tr>
 </table>
 <br>
 <table>
     <th>Date</th>
     <th>Money spent</th>
+    {% for line in spending %}
+        <tr>
+            <td>{{line['purchase_date]}}</td>
+            <td>{{line['sold_price']}}</td>
+        </tr>
+    {% endfor %}
+
 </table>
 <form class = action action="/track_spending" method="POST">
     <input type="text" name = "start_date" placeholder="From: YYYY-MM-DD" required/> &nbsp;
