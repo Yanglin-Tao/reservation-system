@@ -7,7 +7,8 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       password='',
+					   port = 8889,
+                       password='root',
                        db='system',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -116,7 +117,6 @@ def purchase_ticket():
 @app.route('cancel_trip', methods=['GET', 'POST'])
 def cancel_trip():
 	pass
-
 #################################################################################################################
 
 #TODO: Customer gives rating and comment
