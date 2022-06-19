@@ -20,7 +20,7 @@ create table Airline(
 );
  
 create table Airplane(
-  airplane_identification_number numeric(200,0),
+  airplane_identification_number numeric(50,0),
   number_seats numeric(3,0),
   manufacture_company varchar(200),
   age numeric(3,0),
@@ -38,15 +38,15 @@ create table Airport(
 );
 
 create table Flight(
-  flight_number numeric(200,0),
+  flight_number numeric(50,0),
   departure_airport varchar(200),
   departure_date date,
   departure_time time,
   arrival_airport varchar(200),
   arrival_date date,
   arrival_time time,
-  airplane_identification_number numeric(200,0),
-  base_price numeric(200,0),
+  airplane_identification_number numeric(50,0),
+  base_price numeric(50,0),
   airline_name varchar(200),
   flight_status varchar(200),
   primary key(flight_number, departure_date, departure_time, airline_name),
@@ -57,18 +57,18 @@ create table Flight(
 );
  
 create table Ticket(
-  ticket_ID numeric(200,0),
+  ticket_ID numeric(50,0),
   customer_email varchar(200),
   sold_price numeric(6,0),
   card_type varchar(200),
-  card_number numeric(200,0),
+  card_number numeric(50,0),
   name_on_card varchar(200),
   expiration_date date,
   purchase_date date,
   purchase_time time,
   departure_date date,
   departure_time time,
-  flight_number numeric(200,0),
+  flight_number numeric(50,0),
   airline_name varchar(200),
   primary key(ticket_ID),
   foreign key(customer_email) references Customer(customer_email),
@@ -77,7 +77,7 @@ create table Ticket(
 
 create table Purchase(
   customer_email varchar(200),
-  ticket_ID numeric(200,0),
+  ticket_ID numeric(50,0),
   foreign key(customer_email) references Customer(customer_email),
   foreign key(ticket_ID) references Ticket(ticket_ID)
 );

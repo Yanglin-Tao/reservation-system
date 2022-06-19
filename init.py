@@ -1,6 +1,8 @@
 #Import Flask Library
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
+import datetime
+import random
 
 app = Flask(__name__)
 
@@ -74,25 +76,99 @@ def customer_login_auth():
 #Author: Tianzuo Liu
 @app.route('/staff_login_auth', methods=['GET', 'POST'])
 def staff_login_auth():
-	pass
+	user_name = request.form['user_name']
+	staff_password = request.form['staff_password']
+
+	#cursor used to send queries
+	cursor = conn.cursor()
+	#executes query
+	query = 'SELECT * FROM Airline_Staff WHERE user_name = %s and staff_password = %s'
+	cursor.execute(query, (user_name, staff_password))
+	#stores the results in a variable
+	data = cursor.fetchone()
+	cursor.close()
+	error = None
+	if(data):
+		#creates a session for the user
+		#session is a built in
+		session['user_name'] = user_name
+		return redirect(url_for('staff_home'))
+	else:
+		#returns an error message to the html page
+		error = 'Invalid email address or password'
+		return render_template('staff_login.html', error=error)
 
 #TODO: Authenticates customer register
 #Author: Tianzuo Liu
 @app.route('/customer_register_auth', methods=['GET', 'POST'])
 def customer_register_auth():
-	pass
+	customer_email = request.form['customer_email']
+	customer_password = request.form['customer_password']
+
+	#cursor used to send queries
+	cursor = conn.cursor()
+	#executes query
+	query = 'SELECT * FROM Customer WHERE customer_email = %s and customer_password = %s'
+	cursor.execute(query, (customer_email, customer_password))
+	#stores the results in a variable
+	data = cursor.fetchone()
+	
+	if(data):
+		#if query returns the data, it means the data already exists
+		error = "Sorry, this account has already existed."
+		cursor.close()
+		return render_template('customer_register.html', error=error)
+	else:
+		ins = 'INSERT INTO Customer VALUES(%s, %s)'
+		cursor.execute(ins, (customer_email, customer_password))
+		conn.commit()
+		cursor.close()
+		return render_template('index.html')
 
 #TODO: Authenticates staff register
 #Author: Tianzuo Liu
 @app.route('/staff_register_auth', methods=['GET', 'POST'])
 def staff_register_auth():
-	pass
+	user_name = request.form['user_name']
+	staff_password = request.form['staff_password']
+
+	#cursor used to send queries
+	cursor = conn.cursor()
+	#executes query
+	query = 'SELECT * FROM Airline_Staff WHERE user_name = %s and staff_password = %s'
+	cursor.execute(query, (user_name, staff_password))
+	#stores the results in a variable
+	data = cursor.fetchone()
+	
+	if(data):
+		#if query returns the data, it means the data already exists
+		error = "Sorry, this account has already existed."
+		cursor.close()
+		return render_template('staff_register.html', error=error)
+	else:
+		ins = 'INSERT INTO Airline_Staff (user_name, staff_password) VALUES(%s, %s)'
+		cursor.execute(ins, (user_name, staff_password))
+		conn.commit()
+		cursor.close()
+		return render_template('index.html')
 
 #TODO: Customer home
 #Author: Tianzuo Liu
-@app.route('customer_home')
+@app.route('/customer_home')
 def customer_home():
-	pass
+	if "customer_email" in session:
+		customer_email = session['customer_email']
+	else:
+		return redirect(url_for('customer_login'))
+
+	query = 'SELECT * FROM Customer \
+	WHERE customer_email = %s'
+	cursor = conn.cursor()
+	cursor.execute(query,(customer_email))
+	data = cursor.fetchall()
+	cursor.close()
+
+	return render_template('customer_home.html', customer_email = customer_email, data = data)
 
 #TODO: Customer searches for flights
 #Author: Tianzuo Liu
@@ -102,19 +178,79 @@ destination city/airport name, dates (departure or return).
 '''
 # Input: departure airport, arrival airport, daparture date, arrival date
 # Output: flight_number, departure_airport, departure date, arrival date, arrival airport
-@app.route('customer_search_flights', methods=['GET', 'POST'])
+@app.route('/customer_search_flights', methods=['GET', 'POST'])
 def customer_search_flights():
-	pass
+	departure_airport = request.form['departure_airport']
+	arrival_airport = request.form['arrival_airport']
+	daparture_date = request.form['daparture_date']
+	arrival_date = request.form['arrival_date']
+
+	#cursor used to send queries
+	cursor = conn.cursor()
+	#executes query
+	if (arrival_date != None):
+		query = 'SELETCT * \
+		From Flight WHERE departure_airport = %s and arrival_airport = %s and departure_date = %s and arrival_data = %s \
+		and departure_date >= NOW()'
+		cursor.execute(query, (departure_airport, arrival_airport, daparture_date, arrival_date))
+	else:
+		query = 'SELETCT * \
+		From Flight WHERE departure_airport = %s and arrival_airport = %s and departure_date = %s \
+		and departure_date >= NOW()'
+		cursor.execute(query, (departure_airport, arrival_airport, daparture_date))
+	#stores the results in a variable
+	data = cursor.fetchall()
+	cursor.close()
+	if(data):
+		return data
+	else:
+		error = 'Could not find the flight'
+		return render_template('customer_home.html', error = error)
 
 #TODO: Customer purchases a ticket (from result of searching flight)
 #Author: Tianzuo Liu
-@app.route('customer_search_flights', methods=['GET', 'POST'])
+@app.route('/customer_search_flights', methods=['GET', 'POST'])
 def purchase_ticket():
-	pass
+	data = customer_search_flights()
+	flight_number = request.form['flight_number']
+	card_type = request.form['card_type']
+	card_number = request.form['card_number']
+	expiration_date = request.form['expiration_date']
+	name_on_card = request.form['name_on_card']
+	sold_price = request.form['sold_price']
+	airline_name = request.form['airline_name']
+	#cursor used to send queries
+	
+	cursor = conn.cursor()
+	customer_email = session['customer_email']
+
+	query = 'SELECT * \
+	FROM data WHERE flight_number = %s'
+	cursor.execute(query, (flight_number))
+	
+	new_data = cursor.fetchone()
+	ticket_ID = str(random.randint(0,9999999))
+
+	if (new_data):
+		insertion = 'INSERT INTO Ticket VALUES \
+		(%s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s, %s, %s, %s)'
+		cursor.execute(insertion, (ticket_ID, customer_email, sold_price, card_type, card_number, \
+			name_on_card, expiration_date, new_data['departure_date'], new_data['departure_time'],flight_number, airline_name))
+		conn.commit()
+
+		purchase = 'INSERT INTO Purchase VALUES(%s, %s)'
+		cursor.execute(purchase, (customer_email, ticket_ID))
+		conn.commit()
+		cursor.close()
+		message = 'Successfully'
+		return render_template('customer_home.html', message = message)
+	else:
+		error = 'something wrong. Please try again'
+		return render_template('customer_home.html', error = error)
 
 #TODO: Customer cancels a trip
 #Author: Tianzuo Liu
-@app.route('cancel_trip', methods=['GET', 'POST'])
+@app.route('/cancel_trip', methods=['GET', 'POST'])
 def cancel_trip():
 	pass
 
@@ -129,7 +265,7 @@ logged in.
 '''
 # input: flight_number, departure date, departure time, airline name
 # output: none
-@app.route('customer_rating', methods=['GET', 'POST'])
+@app.route('/customer_rating', methods=['GET', 'POST'])
 def customer_rating():
 	cursor = conn.cursor();
 	flight_num = request.form['flight_number']
@@ -156,7 +292,7 @@ month wise money spent within that range
 # default output: total_last_year, monthly_spending_last_year
 # input: start_date, end_date
 # output: total_spending, monthly_spending
-@app.route('track_spending', methods=['GET', 'POST'])
+@app.route('/track_spending', methods=['GET', 'POST'])
 def track_spending():
 	cursor = conn.cursor();
 	email = session['customer_email']
@@ -185,7 +321,7 @@ Customer logs out of the system
 '''
 # input: none
 # output: none
-@app.route('customer_logout')
+@app.route('/customer_logout')
 def customer_logout():
 	session.pop('customer_email')
 	return redirect('/')
@@ -203,7 +339,7 @@ all the customers of a particular flight.
 # input: start_date, end_date, departure_airport, departure_city, arrival_airport, arrival_city
 # output: flight_number, departure_date, departure_time, departure_airport, arrival_date, 
 # 			arrival_time, arrival_airport, customers
-@app.route('staff_view_flights', methods=['GET', 'POST'])
+@app.route('/staff_view_flights', methods=['GET', 'POST'])
 def staff_view_flights():
 	cursor = conn.cursor();
 	start = request.form['start_date']
@@ -242,7 +378,7 @@ future flights operated by the airline he/she works for the next 30 days.
 # input: flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, 
 # 			arrival_time, airplane_identification_number, airline_name
 # output: none
-@app.route('add_flight', methods=['GET', 'POST'])
+@app.route('/add_flight', methods=['GET', 'POST'])
 def create_flight():
 	cursor = conn.cursor();
 	flight_num = request.form['flight_number']
@@ -268,7 +404,7 @@ forms.
 '''
 # input: flight_number, departure_date, departure_time, airline_name, status
 # output: none
-@app.route('change_status', methods=['GET', 'POST'])
+@app.route('/change_status', methods=['GET', 'POST'])
 def change_status():
 	cursor = conn.cursor();
 	flight_num = request.form['flight_number']
@@ -292,7 +428,7 @@ she/he will be able to see all the airplanes owned by the airline he/she works f
 # default output: all_airplanes(airplane_identification_number, number_of_seats, manufacture_company, age, airline_name)
 # input: airplane_identification_number, number_of_seats, manufacture_company, age, airline_name
 # output: none
-@app.route('add_airplane', methods=['GET', 'POST'])
+@app.route('/add_airplane', methods=['GET', 'POST'])
 def add_airplane():
 	cursor = conn.cursor();
 	airplane_identifi_num = request.form['airplane_identification_number']
@@ -310,43 +446,43 @@ def add_airplane():
 
 #TODO: Staff adds new airport in the system
 #Author: Justin Li
-@app.route('add_airport', methods=['GET', 'POST'])
+@app.route('/add_airport', methods=['GET', 'POST'])
 def add_airport():
 	pass
 
 #TODO: Staff views the rating and comments of the flight, along with the average rating
 #Author: Justin Li
-@app.route('view_rating')
+@app.route('/view_rating')
 def view_rating():
 	pass
 
 #TODO: Staff views the most frequent customer
 #Author: Justin Li
-@app.route('frequent_customer')
+@app.route('/frequent_customer')
 def frequent_customer():
 	pass
 
 #TODO: Staff views all flights of a customer
 #Author: Justin Li
-@app.route('view_customer_flights')
+@app.route('/view_customer_flights')
 def view_customer_flights():
 	pass
 
 #TODO: Staff views reports
 #Author: Justin Li
-@app.route('view_reports')
+@app.route('/view_reports')
 def view_reports():
 	pass
 
 #TODO: Staff views earned revenue
 #Author: Justin Li
-@app.route('view_revenue')
+@app.route('/view_revenue')
 def view_revenue():
 	pass
 
 #TODO: Staff logout
 #Author: Justin Li
-@app.route('staff_logout')
+@app.route('/staff_logout')
 def staff_logout():
 	pass
 
