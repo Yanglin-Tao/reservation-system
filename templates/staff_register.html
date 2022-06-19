@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Staff Register</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" type = "text/css" href="{{ url_for('static', filename = 'styles.css')}}">
 </head>
-<body style="background-image:url('images/index_page.jpg'); background-size: cover; background-color: #bfbebe; background-blend-mode: multiply;">
+<body style="background-image:url('/static/index_page.jpg'); background-size: cover; background-color: #bfbebe; background-blend-mode: multiply;">
 <h1 class = heading>Staff Register</h1>
 <form class = login action="/staff_register_auth" method="POST">
     <input type="text" name = "user_name" placeholder="Username" required/> &nbsp;
