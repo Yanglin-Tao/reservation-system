@@ -142,6 +142,10 @@ def customer_register_auth():
 def staff_register_auth():
 	user_name = request.form['user_name']
 	staff_password = request.form['staff_password']
+	first_name = request.form['first_name']
+	last_name = request.form['last_name']
+	date_of_birth = request.form['date_of_birth']
+	airline_name = request.form['airline_name']
 
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -157,8 +161,8 @@ def staff_register_auth():
 		cursor.close()
 		return render_template('staff_register.html', error=error)
 	else:
-		ins = 'INSERT INTO Airline_Staff (user_name, staff_password) VALUES(%s, %s)'
-		cursor.execute(ins, (user_name, staff_password))
+		ins = 'INSERT INTO Airline_Staff VALUES(%s, %s, %s, %s, %s, %s)'
+		cursor.execute(ins, (user_name, staff_password, first_name, last_name, date_of_birth, airline_name))
 		conn.commit()
 		cursor.close()
 		return render_template('index.html')
@@ -171,9 +175,28 @@ def customer_home():
 	return render_template('customer_home.html', customer_email = customer_email)
 
 #TODO: Customer view all future flights
+#Author: Tianzuo Liu
 @app.route('/customer_view_flights')
 def customer_view_flights():
-	pass
+	flight_number = request.form['flight_number']
+	query = 'SELECT ticket_ID FROM Ticket \
+              WHERE customer_email = %s and flight_number = %s'
+
+    cursor = conn.cursor()
+    cursor.execute(query, (session['username'], flight_number))
+    data = cursor.fetchone()
+
+	query ='SELECT * FROM Ticket \
+	WHERE customer_email = %s and ticket_ID = %s'
+	cursor = conn.cursor()
+    cursor.execute(query, (session['username'], data['ticket_ID'))
+    new_data = cursor.fetchone()
+
+	if(new_data):
+		return new_data;
+	else:
+		message = 'No previous flight'
+		return render_template('customer_home.html', message = message)
 
 #TODO: Customer searches for flights
 #Author: Tianzuo Liu
@@ -257,7 +280,26 @@ def purchase_ticket():
 #Author: Tianzuo Liu
 @app.route('/cancel_trip', methods=['GET', 'POST'])
 def cancel_trip():
-	pass
+	flight_number = request.form['flight_number']
+	query = 'SELECT ticket_ID FROM Ticket \
+              WHERE customer_email = %s and flight_number = %s'
+
+    cursor = conn.cursor()
+    cursor.execute(query, (session['username'], flight_number))
+    data = cursor.fetchone()
+   
+	query = 'DELETE FROM Purchase \
+             WHERE ticket_ID = %s'
+    cursor.execute(query, (data['ticket_ID']))
+	query = 'DELETE FROM Ticket \
+             WHERE ticket_ID = %s'
+    cursor.execute(query, (data['ticket_ID'))
+	cursor.close()
+
+	message = 'Successfully deleted'
+
+    return render_template("customer_home.html", message = message)
+    
 
 #################################################################################################################
 
