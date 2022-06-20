@@ -98,7 +98,7 @@
 <table>
     <th>Total spending last year</th>
     <tr>
-        <td>total_last_year</td>
+        <td>{{total_last_year}}</td>
     </tr>
 </table>
 <br>
@@ -117,8 +117,8 @@
 </table>
 
 <form class = action action="/track_spending" method="POST">
-    <input type="text" name = "start_date" placeholder="From: YYYY-MM-DD" required/> &nbsp;
-    <input type="text" name = "end_date" placeholder="To: YYYY-MM-DD" required/> <br>
+    <input type="text" name = "start_date" placeholder="From: YYYY-MM-DD"/> &nbsp;
+    <input type="text" name = "end_date" placeholder="To: YYYY-MM-DD"/> <br>
     <input type="submit" value = "Track my spending" />
 </form>
 <form class = action action="/customer_logout" method="POST">

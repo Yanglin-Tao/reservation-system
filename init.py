@@ -334,10 +334,10 @@ def customer_rating():
 		conn.commit()
 		cursor.close()
 		message = 'Thanks for your feedback!'
-		return redirect(url_for('customer_home'), message = message)
+		return redirect(url_for('customer_home'), customer_email = customer_email, message = message)
 	else:
 		error = 'Something wrong. Please try again.'
-		return redirect(url_for('customer_home'), error = error)
+		return redirect(url_for('customer_home'), ustomer_email = customer_email, error = error)
 
 #TODO: Customer tracks spending
 #Author: Yanglin Tao
@@ -359,18 +359,26 @@ def track_spending():
 	query1 = 'SELECT SUM(sold_price) FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
 		purchase_date >= NOW() - 1 YEAR AND purchase_date <= NOW()'
 	cursor.execute(query1, (email))
-	conn.commit()
+	# stores total spending in the past year
+	data1 = cursor.fetchone()
+	if data1 == None:
+		data1 = 0
+
 	query2 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
 		purchase_date >= NOW() - 6 MONTH AND purchase_date <= NOW()'
 	cursor.execute(query2, (email))
-	conn.commit()
+	# stores purchase date, sold_price in the past 6 months
+	data2 = cursor.fetchall()
 	if start != None and end != None:
-		query2 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
+		query3 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
 		purchase_date >= %s AND purchase_date <= %s'
-		cursor.execute(query2, (email, start, end))
-		conn.commit()
+		cursor.execute(query3, (email, start, end))
+		# stores purchase date, sold_price in a given date range
+		data2 = cursor.fetchall()
+		if data2 == None:
+			data2 = 0
 	cursor.close()
-	return redirect(url_for('customer_home'))
+	return redirect(url_for('customer_home'), customer_email = email, total_last_year = data1, spending = data2)
 
 #TODO: Customer logout
 #Author: Yanglin Tao
