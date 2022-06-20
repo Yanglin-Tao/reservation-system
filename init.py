@@ -181,16 +181,15 @@ def customer_view_flights():
 	flight_number = request.form['flight_number']
 	query = 'SELECT ticket_ID FROM Ticket \
               WHERE customer_email = %s and flight_number = %s'
-
-    cursor = conn.cursor()
-    cursor.execute(query, (session['username'], flight_number))
-    data = cursor.fetchone()
+	cursor = conn.cursor()
+	cursor.execute(query, (session['username'], flight_number))
+	data = cursor.fetchone()
 
 	query ='SELECT * FROM Ticket \
 	WHERE customer_email = %s and ticket_ID = %s'
 	cursor = conn.cursor()
-    cursor.execute(query, (session['username'], data['ticket_ID'))
-    new_data = cursor.fetchone()
+	cursor.execute(query, (session['username'], data['ticket_ID']))
+	new_data = cursor.fetchone()
 
 	if(new_data):
 		return new_data;
@@ -284,21 +283,21 @@ def cancel_trip():
 	query = 'SELECT ticket_ID FROM Ticket \
               WHERE customer_email = %s and flight_number = %s'
 
-    cursor = conn.cursor()
-    cursor.execute(query, (session['username'], flight_number))
-    data = cursor.fetchone()
+	cursor = conn.cursor()
+	cursor.execute(query, (session['username'], flight_number))
+	data = cursor.fetchone()
    
 	query = 'DELETE FROM Purchase \
              WHERE ticket_ID = %s'
-    cursor.execute(query, (data['ticket_ID']))
+	cursor.execute(query, (data['ticket_ID']))
 	query = 'DELETE FROM Ticket \
              WHERE ticket_ID = %s'
-    cursor.execute(query, (data['ticket_ID'))
+	cursor.execute(query, (data['ticket_ID']))
 	cursor.close()
 
 	message = 'Successfully deleted'
 
-    return render_template("customer_home.html", message = message)
+	return render_template("customer_home.html", message = message)
     
 
 #################################################################################################################
