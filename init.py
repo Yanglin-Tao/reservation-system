@@ -146,6 +146,8 @@ def staff_register_auth():
 	last_name = request.form['last_name']
 	date_of_birth = request.form['date_of_birth']
 	airline_name = request.form['airline_name']
+	staff_phone = request.form['staff_phone']
+	staff_email = request.form['staff_email']
 
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -161,8 +163,12 @@ def staff_register_auth():
 		cursor.close()
 		return render_template('staff_register.html', error=error)
 	else:
-		ins = 'INSERT INTO Airline_Staff VALUES(%s, %s, %s, %s, %s, %s)'
-		cursor.execute(ins, (user_name, staff_password, first_name, last_name, date_of_birth, airline_name))
+		ins1 = 'INSERT INTO Airline_Staff VALUES(%s, %s, %s, %s, %s, %s)'
+		cursor.execute(ins1, (user_name, staff_password, first_name, last_name, date_of_birth, airline_name))
+		ins2 = 'INSERT INTO staff_phone VALUES(%s, %s)'
+		cursor.execute(ins2, (user_name, staff_phone))
+		ins3 = 'INSERT INTO staff_email VALUES(%s, %s)'
+		cursor.execute(ins3, (user_name, staff_email))
 		conn.commit()
 		cursor.close()
 		return render_template('index.html')
