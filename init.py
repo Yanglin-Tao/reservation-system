@@ -273,18 +273,30 @@ logged in.
 @app.route('/customer_rating', methods=['GET', 'POST'])
 def customer_rating():
 	cursor = conn.cursor();
+	customer_email = session['customer_email']
 	flight_num = request.form['flight_number']
 	dept_date = request.form['departure_date']
 	dept_time = request.form['departure_time']
 	airline = request.form['airline_name']
+	arri_date = request.form['arrival_date']
 	rate = request.form['rating']
 	comm = request.form['comment']
-	query = 'INSERT INTO Take (rating, comment) VALUES (%s, %s) WHERE flight_number = %s AND departure_date = %s AND \
+	# check if the flight is in the customer's past flights
+	query = 'SELECT * FROM Customer NATURAL JOIN Tickets WHERE customer_email = %s AND flight_number = %s AND departure_date = %s AND \
+		departure_time = %s AND airline_name = %s AND arrival_date < NOW()'
+	cursor.execute(query, (customer_email, flight_num, dept_date, dept_time, airline, arri_date))
+	data = cursor.fetchone()
+	if(data):
+		query = 'INSERT INTO Take (rating, comment) VALUES (%s, %s) WHERE flight_number = %s AND departure_date = %s AND \
 		departure_time = %s AND airline_name = %s'
-	cursor.execute(query, (rate, comm, flight_num, dept_date, dept_time, airline))
-	conn.commit()
-	cursor.close()
-	return redirect(url_for('customer_home'))
+		cursor.execute(query, (rate, comm, flight_num, dept_date, dept_time, airline))
+		conn.commit()
+		cursor.close()
+		message = 'Thanks for your feedback!'
+		return redirect(url_for('customer_home'), message = message)
+	else:
+		error = 'Something wrong. Please try again.'
+		return redirect(url_for('customer_home'), error = error)
 
 #TODO: Customer tracks spending
 #Author: Yanglin Tao
