@@ -21,6 +21,9 @@
     <input type="text" name = "passport_country" placeholder="Passport country" required/> &nbsp;
     <input type="text" name = "date_of_birth" placeholder="Date of Birth: YYYY/MM/DD" required/> </br>
     <input type="submit" value = Register />
+    {% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
 </form>
 </body>
 </html>

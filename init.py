@@ -49,14 +49,14 @@ def staff_register():
 @app.route('/customer_login_auth', methods=['GET', 'POST'])
 def customer_login_auth():
 	#grabs information from the forms
-	customer_email = request.form['customer_email']
-	customer_password = request.form['customer_password']
+	email = request.form['customer_email']
+	password = request.form['customer_password']
 
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
-	query = 'SELECT * FROM user WHERE customer_email = %s and customer_password = %s'
-	cursor.execute(query, (customer_email, customer_password))
+	query = 'SELECT * FROM Customer WHERE customer_email = %s and customer_password = %s'
+	cursor.execute(query, (email, password))
 	#stores the results in a variable
 	data = cursor.fetchone()
 	#use fetchall() if you are expecting more than 1 data row
@@ -65,7 +65,7 @@ def customer_login_auth():
 	if(data):
 		#creates a session for the the user
 		#session is a built in
-		session['customer_email'] = customer_email
+		session['customer_email'] = email
 		return redirect(url_for('customer_home'))
 	else:
 		#returns an error message to the html page
@@ -102,8 +102,18 @@ def staff_login_auth():
 #Author: Tianzuo Liu
 @app.route('/customer_register_auth', methods=['GET', 'POST'])
 def customer_register_auth():
+	customer_name = request.form['customer_name']
 	customer_email = request.form['customer_email']
 	customer_password = request.form['customer_password']
+	building_number = request.form['building_number']
+	street = request.form['street']
+	city = request.form['city']
+	state_name = request.form['state_name']
+	phone_number = request.form['phone_number']
+	passport_number = request.form['passport_number']
+	passport_expiration = request.form['passport_expiration']
+	passport_country = request.form['passport_country']
+	date_of_birth = request.form['date_of_birth']
 
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -119,8 +129,9 @@ def customer_register_auth():
 		cursor.close()
 		return render_template('customer_register.html', error=error)
 	else:
-		ins = 'INSERT INTO Customer VALUES(%s, %s)'
-		cursor.execute(ins, (customer_email, customer_password))
+		ins = 'INSERT INTO Customer VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+		cursor.execute(ins, (customer_name, customer_email, customer_password, building_number, street, city, state_name, phone_number, \
+		passport_number, passport_expiration, passport_country, date_of_birth))
 		conn.commit()
 		cursor.close()
 		return render_template('index.html')
@@ -156,19 +167,13 @@ def staff_register_auth():
 #Author: Tianzuo Liu
 @app.route('/customer_home')
 def customer_home():
-	if "customer_email" in session:
-		customer_email = session['customer_email']
-	else:
-		return redirect(url_for('customer_login'))
+	customer_email = session['customer_email']
+	return render_template('customer_home.html', customer_email = customer_email)
 
-	query = 'SELECT * FROM Customer \
-	WHERE customer_email = %s'
-	cursor = conn.cursor()
-	cursor.execute(query,(customer_email))
-	data = cursor.fetchall()
-	cursor.close()
-
-	return render_template('customer_home.html', customer_email = customer_email, data = data)
+#TODO: Customer view all future flights
+@app.route('/customer_view_flights')
+def customer_view_flights():
+	pass
 
 #TODO: Customer searches for flights
 #Author: Tianzuo Liu
@@ -485,6 +490,8 @@ def view_revenue():
 @app.route('/staff_logout')
 def staff_logout():
 	pass
+
+app.secret_key = 'some key that you will never guess'
 
 #Run the app on localhost port 5000
 if __name__ == "__main__":

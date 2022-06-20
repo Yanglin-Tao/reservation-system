@@ -11,7 +11,10 @@
     <input type="text" name = "user_name" placeholder="Username" required/> </br>
     <input type="password" name = "staff_password" placeholder="Password" required/></br>
     <input type="submit" value = Login />
+    {% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
 </form>
-<p class = center><a class = "button" href="index.html">Go Back</a></p>
+<p class = center><a class = "button" href="/">Go Back</a></p>
 </body>
 </html>

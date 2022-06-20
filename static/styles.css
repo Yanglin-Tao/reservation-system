@@ -24,6 +24,11 @@ p.center{
     font-weight: bold;
 }
 
+p.error{
+    font-family: Helvetica;
+    color: dimgray;
+}
+
 form.login{
     text-align:center;
 }
