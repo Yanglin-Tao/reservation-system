@@ -166,9 +166,16 @@ def staff_register_auth():
 		ins1 = 'INSERT INTO Airline_Staff VALUES(%s, %s, %s, %s, %s, %s)'
 		cursor.execute(ins1, (user_name, staff_password, first_name, last_name, date_of_birth, airline_name))
 		ins2 = 'INSERT INTO staff_phone VALUES(%s, %s)'
-		cursor.execute(ins2, (user_name, staff_phone))
+
+		while(staff_phone != None):
+			cursor.execute(ins2, (user_name, staff_phone))
+			staff_phone = request.form['staff_phone']
 		ins3 = 'INSERT INTO staff_email VALUES(%s, %s)'
-		cursor.execute(ins3, (user_name, staff_email))
+
+		while(staff_email != None):
+			cursor.execute(ins3, (user_name, staff_email))
+			staff_email = request.form['staff_email']
+
 		conn.commit()
 		cursor.close()
 		return render_template('index.html')
@@ -335,15 +342,15 @@ def customer_rating():
 	cursor.execute(query, (customer_email, flight_num, dept_date, dept_time, airline, dept_date))
 	data = cursor.fetchone()
 	if(data):
-		query = 'INSERT INTO Taken(rating, comment) VALUES(%s, %s) WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
-		cursor.execute(query, (rate, comm, flight_num, dept_date, dept_time, airline))
+		query = 'INSERT INTO Taken VALUES(%s, %s, %s, %s)'
+		cursor.execute(query, (customer_email, airline, rate, comm))
 		conn.commit()
 		cursor.close()
 		message = 'Thanks for your feedback!'
-		return redirect(url_for('customer_home'), customer_email = customer_email, message = message)
+		return redirect(url_for('customer_home', message = message))
 	else:
 		error = 'Something wrong. Please try again.'
-		return redirect(url_for('customer_home'), customer_email = customer_email, error = error)
+		return redirect(url_for('customer_home', error = error))
 
 #TODO: Customer tracks spending
 #Author: Yanglin Tao
