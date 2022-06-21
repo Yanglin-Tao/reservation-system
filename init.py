@@ -146,6 +146,8 @@ def staff_register_auth():
 	last_name = request.form['last_name']
 	date_of_birth = request.form['date_of_birth']
 	airline_name = request.form['airline_name']
+	staff_phone = request.form['staff_phone']
+	staff_email = request.form['staff_email']
 
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -161,8 +163,18 @@ def staff_register_auth():
 		cursor.close()
 		return render_template('staff_register.html', error=error)
 	else:
-		ins = 'INSERT INTO Airline_Staff VALUES(%s, %s, %s, %s, %s, %s)'
-		cursor.execute(ins, (user_name, staff_password, first_name, last_name, date_of_birth, airline_name))
+		ins1 = 'INSERT INTO Airline_Staff VALUES(%s, %s, %s, %s, %s, %s)'
+		cursor.execute(ins1, (user_name, staff_password, first_name, last_name, date_of_birth, airline_name))
+		ins2 = 'INSERT INTO staff_phone VALUES(%s, %s)'
+
+		while(staff_phone != None):
+			cursor.execute(ins2, (user_name, staff_phone))
+			staff_phone = request.form['staff_phone']
+		ins3 = 'INSERT INTO staff_email VALUES(%s, %s)'
+
+		while(staff_email != None):
+			cursor.execute(ins3, (user_name, staff_email))
+			staff_email = request.form['staff_email']
 		conn.commit()
 		cursor.close()
 		return render_template('index.html')
@@ -181,16 +193,15 @@ def customer_view_flights():
 	flight_number = request.form['flight_number']
 	query = 'SELECT ticket_ID FROM Ticket \
               WHERE customer_email = %s and flight_number = %s'
-
-    cursor = conn.cursor()
-    cursor.execute(query, (session['username'], flight_number))
-    data = cursor.fetchone()
+	cursor = conn.cursor()
+	cursor.execute(query, (session['username'], flight_number))
+	data = cursor.fetchone()
 
 	query ='SELECT * FROM Ticket \
 	WHERE customer_email = %s and ticket_ID = %s'
 	cursor = conn.cursor()
-    cursor.execute(query, (session['username'], data['ticket_ID'))
-    new_data = cursor.fetchone()
+	cursor.execute(query, (session['username'], data['ticket_ID']))
+	new_data = cursor.fetchone()
 
 	if(new_data):
 		return new_data;
@@ -283,22 +294,20 @@ def cancel_trip():
 	flight_number = request.form['flight_number']
 	query = 'SELECT ticket_ID FROM Ticket \
               WHERE customer_email = %s and flight_number = %s'
+	cursor = conn.cursor()
+	cursor.execute(query, (session['username'], flight_number))
+	data = cursor.fetchone()
 
-    cursor = conn.cursor()
-    cursor.execute(query, (session['username'], flight_number))
-    data = cursor.fetchone()
-   
 	query = 'DELETE FROM Purchase \
              WHERE ticket_ID = %s'
-    cursor.execute(query, (data['ticket_ID']))
+	cursor.execute(query, (data['ticket_ID']))
 	query = 'DELETE FROM Ticket \
              WHERE ticket_ID = %s'
-    cursor.execute(query, (data['ticket_ID'))
+	cursor.execute(query, (data['ticket_ID']))
 	cursor.close()
 
 	message = 'Successfully deleted'
-
-    return render_template("customer_home.html", message = message)
+	return render_template("customer_home.html", message = message)
     
 
 #################################################################################################################
