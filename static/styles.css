@@ -35,12 +35,12 @@ body{
 
 p.error{
     font-family: Helvetica;
-    color: dimgray;
+    color: white;
 }
 
 p.message{
     font-family: Helvetica;
-    color: dimgray;
+    color: white;
 }
 
 form.login{

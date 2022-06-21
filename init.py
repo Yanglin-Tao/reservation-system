@@ -76,27 +76,30 @@ def customer_login_auth():
 #Author: Tianzuo Liu
 @app.route('/staff_login_auth', methods=['GET', 'POST'])
 def staff_login_auth():
-	user_name = request.form['user_name']
-	staff_password = request.form['staff_password']
-
-	#cursor used to send queries
-	cursor = conn.cursor()
-	#executes query
-	query = 'SELECT * FROM Airline_Staff WHERE user_name = %s and staff_password = %s'
-	cursor.execute(query, (user_name, staff_password))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	cursor.close()
-	error = None
-	if(data):
-		#creates a session for the user
-		#session is a built in
-		session['user_name'] = user_name
-		return redirect(url_for('staff_home'))
+	if request.method == 'POST':
+		user_name = request.form['user_name']
+		staff_password = request.form['staff_password']
+		#cursor used to send queries
+		cursor = conn.cursor()
+		#executes query
+		query = 'SELECT * FROM Airline_Staff WHERE user_name = %s and staff_password = %s'
+		cursor.execute(query, (user_name, staff_password))
+		#stores the results in a variable
+		data = cursor.fetchone()
+		cursor.close()
+		error = None
+		if(data):
+			#creates a session for the user
+			#session is a built in
+			session['user_name'] = user_name
+			return redirect(url_for('staff_home'))
+		else:
+			#returns an error message to the html page
+			error = 'Invalid email address or password'
+			return render_template('staff_login.html', error=error)
 	else:
-		#returns an error message to the html page
-		error = 'Invalid email address or password'
-		return render_template('staff_login.html', error=error)
+		return render_template('staff_login.html')
+
 
 #TODO: Authenticates customer register
 #Author: Tianzuo Liu
@@ -404,6 +407,13 @@ Customer logs out of the system
 def customer_logout():
 	session.pop('customer_email')
 	return redirect('/')
+
+#TODO: Staff home
+#Author: Yanglin Tao
+@app.route('/staff_home')
+def staff_home():
+	user_name = session['user_name']
+	return render_template('staff_home.html', user_name = user_name)
 
 #TODO: Staff views flights
 #Author: Yanglin Tao

@@ -48,10 +48,10 @@
         {% endfor %}
     </table>
     <form class = action action="/customer_search_flights" method="POST">
-        <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
-        <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> <br>
-        <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
-        <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
+        Departure airport：<input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
+        Arrival airport：<input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> <br>
+        Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
+        Arrival date: <input type="date" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
         <input type="submit" value = "Search for flights" /> &nbsp;
         {% if error %}
         <p class="error"><strong>Error:</strong> {{error}}</p>
@@ -66,10 +66,10 @@
     </form>
     
     <form class = action action="/cancel_trip" method="POST">
-        <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
-        <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> <br>
-        <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
-        <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
+        Departure airport: <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
+        Arrival airport: <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> <br>
+        Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
+        Arrival date: <input type="date" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
         <input type="submit" value = "Cancel my trip" />
         {% if error %}
         <p class="error"><strong>Error:</strong> {{error}}</p>
@@ -117,8 +117,8 @@
     </table>
     
     <form class = action action="/track_spending" method="POST">
-        <input type="text" name = "start_date" placeholder="From: YYYY-MM-DD"/> &nbsp;
-        <input type="text" name = "end_date" placeholder="To: YYYY-MM-DD"/> <br>
+        From: <input type="date" name = "start_date" placeholder="From: YYYY-MM-DD"/> &nbsp;
+        To: <input type="date" name = "end_date" placeholder="To: YYYY-MM-DD"/> <br>
         <input type="submit" value = "Track my spending" />
     </form>
     <form class = action action="/customer_logout" method="POST">
