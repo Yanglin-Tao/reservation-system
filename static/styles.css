@@ -22,7 +22,16 @@ p.center{
     font-family:Helvetica;
     text-align:center;
     font-weight: bold;
+    color: white;
 }
+
+body{
+    color: white;
+    font-family:Helvetica;
+    font-weight: bold;
+    font-size: 18px;
+}
+
 
 p.error{
     font-family: Helvetica;
@@ -53,6 +62,36 @@ input[type=text], select {
 }
 
 input[type=password], select {
+    width: 25%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=number], select {
+    width: 25%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=date], select {
+    width: 25%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=time], select {
     width: 25%;
     padding: 12px 20px;
     margin: 8px 0;

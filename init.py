@@ -224,12 +224,12 @@ def customer_search_flights():
 	if (arrival_date != None):
 		query = 'SELETCT * \
 		From Flight WHERE departure_airport = %s and arrival_airport = %s and departure_date = %s and arrival_data = %s \
-		and departure_date >= NOW()'
+		and departure_date >= CURDATE()'
 		cursor.execute(query, (departure_airport, arrival_airport, daparture_date, arrival_date))
 	else:
 		query = 'SELETCT * \
 		From Flight WHERE departure_airport = %s and arrival_airport = %s and departure_date = %s \
-		and departure_date >= NOW()'
+		and departure_date >= CURDATE()'
 		cursor.execute(query, (departure_airport, arrival_airport, daparture_date))
 	#stores the results in a variable
 	data = cursor.fetchall()
@@ -266,7 +266,7 @@ def purchase_ticket():
 
 	if (new_data):
 		insertion = 'INSERT INTO Ticket VALUES \
-		(%s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s, %s, %s, %s)'
+		(%s, %s, %s, %s, %s, %s, %s, CURDATE(), CURDATE(), %s, %s, %s, %s)'
 		cursor.execute(insertion, (ticket_ID, customer_email, sold_price, card_type, card_number, \
 			name_on_card, expiration_date, new_data['departure_date'], new_data['departure_time'],flight_number, airline_name))
 		conn.commit()
@@ -321,21 +321,21 @@ logged in.
 def customer_rating():
 	cursor = conn.cursor();
 	customer_email = session['customer_email']
-	flight_num = request.form['flight_number']
-	dept_date = request.form['departure_date']
-	dept_time = request.form['departure_time']
-	airline = request.form['airline_name']
-	arri_date = request.form['arrival_date']
-	rate = request.form['rating']
-	comm = request.form['comment']
+	if request.method == 'POST':
+		flight_num = request.form['flight_number']
+		dept_date = request.form['departure_date']
+		dept_time = request.form['departure_time']
+		airline = request.form['airline_name']
+		rate = request.form['rating']
+		comm = request.form['comment']
+	else: 
+		return render_template('customer_home.html')
 	# check if the flight is in the customer's past flights
-	query = 'SELECT * FROM Customer NATURAL JOIN Tickets WHERE customer_email = %s AND flight_number = %s AND departure_date = %s AND \
-		departure_time = %s AND airline_name = %s AND arrival_date < NOW()'
-	cursor.execute(query, (customer_email, flight_num, dept_date, dept_time, airline, arri_date))
+	query = 'SELECT * FROM Customer NATURAL JOIN Ticket WHERE customer_email = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s AND %s < CURRENT_DATE()'
+	cursor.execute(query, (customer_email, flight_num, dept_date, dept_time, airline, dept_date))
 	data = cursor.fetchone()
 	if(data):
-		query = 'INSERT INTO Take (rating, comment) VALUES (%s, %s) WHERE flight_number = %s AND departure_date = %s AND \
-		departure_time = %s AND airline_name = %s'
+		query = 'INSERT INTO Taken(rating, comment) VALUES(%s, %s) WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
 		cursor.execute(query, (rate, comm, flight_num, dept_date, dept_time, airline))
 		conn.commit()
 		cursor.close()
@@ -343,7 +343,7 @@ def customer_rating():
 		return redirect(url_for('customer_home'), customer_email = customer_email, message = message)
 	else:
 		error = 'Something wrong. Please try again.'
-		return redirect(url_for('customer_home'), ustomer_email = customer_email, error = error)
+		return redirect(url_for('customer_home'), customer_email = customer_email, error = error)
 
 #TODO: Customer tracks spending
 #Author: Yanglin Tao
@@ -363,7 +363,7 @@ def track_spending():
 	start = request.form['start_date']
 	end = request.form['end_date']
 	query1 = 'SELECT SUM(sold_price) FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
-		purchase_date >= NOW() - 1 YEAR AND purchase_date <= NOW()'
+		purchase_date >= CURDATE() - 1 YEAR AND purchase_date <= CURDATE()'
 	cursor.execute(query1, (email))
 	# stores total spending in the past year
 	data1 = cursor.fetchone()
@@ -371,7 +371,7 @@ def track_spending():
 		data1 = 0
 
 	query2 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
-		purchase_date >= NOW() - 6 MONTH AND purchase_date <= NOW()'
+		purchase_date >= CURDATE() - 6 MONTH AND purchase_date <= CURDATE()'
 	cursor.execute(query2, (email))
 	# stores purchase date, sold_price in the past 6 months
 	data2 = cursor.fetchall()
@@ -421,8 +421,8 @@ def staff_view_flights():
 	arri_airport = request.form['arrival_airport']
 	arri_city = request.form['arrival_city']
 	query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time,\
-			 arrival_airport, customer_email FROM Ticket NATURAL JOIN Customer WHERE departure_date >= NOW() DAY AND \
-				departure_date <= DATE(NOW()) + 30 DAY'
+			 arrival_airport, customer_email FROM Ticket NATURAL JOIN Customer WHERE departure_date >= CURDATE() DAY AND \
+				departure_date <= DATE(CURDATE()) + 30 DAY'
 	cursor.execute(query)
 	conn.commit()
 	# if there are inputs from user that specifies astart_date, end_date, departure_airport, departure_city, 
