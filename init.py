@@ -339,7 +339,7 @@ def customer_rating():
 		rate = request.form['rating']
 		comm = request.form['comment']
 	else: 
-		return render_template('customer_home.html')
+		return render_template('customer_home.html', customer_email = customer_email)
 	# check if the flight is in the customer's past flights
 	query = 'SELECT * FROM Customer NATURAL JOIN Ticket WHERE customer_email = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s AND %s < CURRENT_DATE()'
 	cursor.execute(query, (customer_email, flight_num, dept_date, dept_time, airline, dept_date))
@@ -370,31 +370,31 @@ month wise money spent within that range
 def track_spending():
 	cursor = conn.cursor();
 	email = session['customer_email']
-	start = request.form['start_date']
-	end = request.form['end_date']
-	query1 = 'SELECT SUM(sold_price) FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
-		purchase_date >= CURDATE() - 1 YEAR AND purchase_date <= CURDATE()'
-	cursor.execute(query1, (email))
-	# stores total spending in the past year
-	data1 = cursor.fetchone()
-	if data1 == None:
-		data1 = 0
-
-	query2 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
-		purchase_date >= CURDATE() - 6 MONTH AND purchase_date <= CURDATE()'
-	cursor.execute(query2, (email))
-	# stores purchase date, sold_price in the past 6 months
-	data2 = cursor.fetchall()
-	if start != None and end != None:
-		query3 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND \
-		purchase_date >= %s AND purchase_date <= %s'
-		cursor.execute(query3, (email, start, end))
-		# stores purchase date, sold_price in a given date range
+	if request.method == 'POST':
+		query1 = 'SELECT SUM(sold_price) AS total_last_year FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 YEAR) AND purchase_date <= CURRENT_DATE()'
+		cursor.execute(query1, (email))
+		# stores total spending in the past year
+		data1 = cursor.fetchone()
+		if data1 == None:
+			data1 = 0
+		# query2 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= CURDATE() - 6 MONTH AND purchase_date <= CURDATE()'
+		query2 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH) AND purchase_date <= CURRENT_DATE()'
+		cursor.execute(query2, (email))
+		# stores purchase date, sold_price in the past 6 months
 		data2 = cursor.fetchall()
-		if data2 == None:
-			data2 = 0
-	cursor.close()
-	return redirect(url_for('customer_home'), customer_email = email, total_last_year = data1, spending = data2)
+		start = request.form['start_date']
+		end = request.form['end_date']
+		if start != None and end != None:
+			query3 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= %s AND purchase_date <= %s'
+			cursor.execute(query3, (email, start, end))
+			# stores purchase date, sold_price in a given date range
+			data2 = cursor.fetchall()
+			if data2 == None:
+				data2 = 0
+		cursor.close()
+		return render_template('customer_home.html', customer_email = email, total_last_year = data1, spending = data2)
+	else:
+		return render_template('customer_home.html', customer_email = email)
 
 #TODO: Customer logout
 #Author: Yanglin Tao
@@ -406,7 +406,7 @@ Customer logs out of the system
 @app.route('/customer_logout')
 def customer_logout():
 	session.pop('customer_email')
-	return redirect('/')
+	return redirect(url_for('customer_logout'))
 
 #TODO: Staff home
 #Author: Yanglin Tao
@@ -537,43 +537,119 @@ def add_airplane():
 #Author: Justin Li
 @app.route('/add_airport', methods=['GET', 'POST'])
 def add_airport():
-	pass
+	cursor = conn.cursor()
+	airport_name = request.form['airport_name']
+	airport_city = request.form['airport_city']
+	airport_cout = request.form['airport_country']
+	airport_type = request.form['airport_type']
+	query = 'INSERT INTO AIRPORT (airport_name, airport_city, airport_country, airport_type) VALUES (%s, %s, %s, %s)'
+	cursor.execute(query, (airport_name, airport_city, airport_cout, airport_type))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('staff_home'))
 
 #TODO: Staff views the rating and comments of the flight, along with the average rating
 #Author: Justin Li
 @app.route('/view_rating')
 def view_rating():
-	pass
+    cursor = conn.cursor();
+    customer_email = request.form['cus_email']
+    airline_name = request.form['airline_name']
+    airline_rating = request.form['air_rating']
+    airline_comment = request.form['air_comment']
+    query = 'SELECT cus_email, airline_name, air_rating, air_comment FROM Taken NATURAL JOIN Airline_Staff'
+    cursor.execute(query)
+    conn.commit
+    #now, view the average
+    query = 'SELECT AVG(air_rating) FROM Taken NATURAL JOIN Airline_staff'
+    cursor.execute(query)
+    conn.commit()
+    cursor.close()
+    return redirect(url_for('staff_home'))
 
 #TODO: Staff views the most frequent customer
 #Author: Justin Li
 @app.route('/frequent_customer')
 def frequent_customer():
-	pass
+    cursor = conn.cursor();
+    customer_name = request.form['cus_name']
+    customer_email = request.form['cus_email']
+    ticket_ID = request.form['ticket_id']
+    query = 'SELECT MAX(ticket_id) FROM Customer NATURAL JOIN Purchase where Customer.cus_email = Purchase.cus_email GROUP BY Customer.cus_email'
+    cursor.execute(query)
+    conn.commit
+    cursor.close()
+    return redirect(url_for('staff_home'))
 
 #TODO: Staff views all flights of a customer
 #Author: Justin Li
 @app.route('/view_customer_flights')
 def view_customer_flights():
-	pass
+    cursor = conn.cursor();
+    customer_name = request.form['cus_name']
+    customer_email = request.form['cus_email']
+    ticket_ID = request.form['ticket_id']
+    flight_number = request.form['flight_num']
+    departure_date = request.form['depart_date']
+    departure_time = request.form['depart_time']
+    departure_airport = request.form['depart_airport']
+    arrival_date = request.form['arri_date']
+    arrival_time = request.form['arri_time']
+    arrival_airport = request.form['arri_airport']
+    query = 'SELECT flight_num, depart_airport, depart_date, depar_time, arri_airport, arri_date, arri_time FROM Customer NATURAL JOIN Purchase NATURAL JOIN Ticket NATURAL JOIN Flight WHERE Customer.cus_email = %s'
+    cursor.execute(query)
+    conn.commit
+    cursor.close()
+    return redirect(url_for('staff_home'))
 
 #TODO: Staff views reports
 #Author: Justin Li
 @app.route('/view_reports')
 def view_reports():
-	pass
+    cursor = conn.cursor();
+    flight_number = request.form['flight_num']
+    departure_date = request.form['depart_date']
+    departure_time = request.form['depart_time']
+    departure_airport = request.form['depart_airport']
+    arrival_date = request.form['arri_date']
+    arrival_time = request.form['arri_time']
+    arrival_airport = request.form['arri_airport']
+    flight_status = request.form['flight_status']
+    airline_name = request.form['airline_name']
+    user_name = request.form['user_name']
+    query = 'SELECT flight_status FROM Flight NATURAL JOIN Airline_staff WHERE Flight.airline_name = Airline_staff.airline_name'
+    cursor.execute(query)
+    conn.commit
+    cursor.close()
+    return redirect(url_for('staff_home'))
 
 #TODO: Staff views earned revenue
 #Author: Justin Li
 @app.route('/view_revenue')
 def view_revenue():
-	pass
+    cursor = conn.cursor();
+    flight_number = request.form['flight_num']
+    departure_date = request.form['depart_date']
+    departure_time = request.form['depart_time']
+    departure_airport = request.form['depart_airport']
+    arrival_date = request.form['arri_date']
+    arrival_time = request.form['arri_time']
+    arrival_airport = request.form['arri_airport']
+    base_price = request.form['base_price']
+    airline_name = request.form['airline_name']
+    user_name = request.form['user_name']
+    query = 'SELECT SUM(base_price) FROM Flight NATURAL JOIN Airline_staff WHERE Airline_staff.airline_name = Flight.airline_name'
+    cursor.execute(query)
+    conn.commit
+    cursor.close()
+    return redirect(url_for('staff_home'))
 
 #TODO: Staff logout
 #Author: Justin Li
 @app.route('/staff_logout')
 def staff_logout():
-	pass
+    session.pop('staff_email')
+    return redirect('/')
 
 app.secret_key = 'some key that you will never guess'
 

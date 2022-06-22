@@ -97,9 +97,11 @@
     
     <table>
         <th>Total spending last year</th>
+        {% for line in total_last_year %}
         <tr>
-            <td>{{total_last_year}}</td>
+            <td>{{line[0]}}</td>
         </tr>
+        {% endfor %}
     </table>
     <br>
     <table>
@@ -121,7 +123,7 @@
         To: <input type="date" name = "end_date" placeholder="To: YYYY-MM-DD"/> <br>
         <input type="submit" value = "Track my spending" />
     </form>
-    <form class = action action="/customer_logout" method="POST">
+    <form class = action action="/customer_logout">
         <input type="submit" value = "Logout" />
     </form>
     </body>
