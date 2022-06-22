@@ -15,10 +15,57 @@ conn = pymysql.connect(host='localhost',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
+#Define route for index page
 #Author: Yanglin Tao
 @app.route('/')
 def hello():
 	return render_template('index.html')
+
+#Show all future flights to anyone using the system
+#Author: Yanglin Tao
+@app.route('/general_show_flights', methods=['GET', 'POST'])
+def general_show_flights():
+	cursor = conn.cursor()
+	if request.method == 'POST':
+		dept_airport = request.form['departure_airport']
+		arri_airport = request.form['arrival_airport']
+		dept_date = request.form['departure_date']
+		arri_date = request.form['arrival_date']
+		if dept_airport != None and arri_airport != None and dept_date != None and arri_date != None:
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_date = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
+			cursor.execute(query, (dept_date, dept_airport, arri_date, arri_airport, dept_date))
+			data = cursor.fetchall()	
+			cursor.close()
+			return render_template('index.html', flights = data)
+		else:
+			error = 'Invalid data'
+			return render_template('index.html', error=error)
+	else:
+		return render_template('index.html')
+
+
+
+#Check flight status to anyone using the system
+#Author: Yanglin Tao
+@app.route('/general_check_status', methods=['GET', 'POST'])
+def general_check_status():
+	cursor = conn.cursor()
+	if request.method == 'POST':
+		airline = request.form['airline_name']
+		flight_num = request.form['flight_number']
+		dept_date = request.form['departure_date']
+		arri_date = request.form['arrival_date']
+		if airline != None and flight_num != None and dept_date != None and arri_date != None:
+			query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Flight WHERE airline_name = %s AND flight_number = %s AND departure_date = %s AND arrival_date = %s'
+			cursor.execute(query, (airline, flight_num, dept_date, arri_date))
+			data = cursor.fetchall()	
+			cursor.close()
+			return render_template('index.html', status = data)
+		else:
+			error = 'Invalid data'
+			return render_template('index.html', error=error)
+	else:
+		return render_template('index.html')
 
 #Define route for customer login
 #Author: Yanglin Tao
@@ -51,7 +98,6 @@ def customer_login_auth():
 	#grabs information from the forms
 	email = request.form['customer_email']
 	password = request.form['customer_password']
-
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query

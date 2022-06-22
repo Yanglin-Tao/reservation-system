@@ -15,13 +15,27 @@
     <th>Arrival date</th>
     <th>Arrival time</th>
     <th>Arrival airport</th>
+    {% for line in flights %}
+        <tr>
+            <td>{{line['flight_number']}}</td>
+            <td>{{line['departure_date']}}</td>
+            <td>{{line['departure_time']}}</td>
+            <td>{{line['departure_airport']}}</td>
+            <td>{{line['arrival_date']}}</td>
+            <td>{{line['arrival_time']}}</td>
+            <td>{{line['arrival_airport']}}</td>
+        </tr>
+    {% endfor %}
 </table>
-<form class = action action="/post" method="POST">
+<form class = action action="/general_show_flights" method="POST">
     Departure airport: <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
     Arrival airport: <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/></br>
     Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
     Arrival date: <input type="date" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/></br>
     <input type="submit" value = "Show all future flights" />
+    {% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
 </form>
 <table>
     <th>Airline name</th>
@@ -29,13 +43,25 @@
     <th>Departure date</th>
     <th>Arrival date</th>
     <th>Flight status</th>
+    {% for line in status %}
+        <tr>
+            <td>{{line['airline_name']}}</td>
+            <td>{{line['flight_number']}}</td>
+            <td>{{line['departure_date']}}</td>
+            <td>{{line['arrival_date']}}</td>
+            <td>{{line['flight_status']}}</td>
+        </tr>
+    {% endfor %}
 </table>
-<form class = action action="/post" method="POST">
+<form class = action action="/general_check_status" method="POST">
     Airline name: <input type="text" name = "airline_name" placeholder="Airline name" required/> &nbsp;
     Flight number: <input type="number" name = "flight_number" placeholder="Flight number" required/></br>
     Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
     Arrival date: <input type="date" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/></br>
     <input type="submit" value = "Check flight status" />
+    {% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
 </form>
 <br>
 <p class = center><a class = "button" href="/customer_login">Customer Login</a> &nbsp; <a class = "button" href="/customer_register">Customer Register</a></p>
