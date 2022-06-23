@@ -81,7 +81,7 @@
     {% for line in airplanes %}
         <tr>
             <td>{{line['airplane_identification_number']}}</td>
-            <td>{{line['number_of_seats']}}</td>
+            <td>{{line['number_seats']}}</td>
             <td>{{line['manufacture_company']}}</td>
             <td>{{line['age']}}</td>
             <td>{{line['airline_name']}}</td>
@@ -90,12 +90,17 @@
 </table>
 
 <form class = action action="/add_airplane" method="POST">
-    Airplane identification number: <input type="number" name = "airplane_identification_number" placeholder="Airplane identification number" required/> &nbsp;
-    Number of seats: <input type="number" name = "number_of_seats" placeholder="Number of seats" required/> </br>
-    Manufacture company: <input type="text" name = "manufacture_company" placeholder="Manufacture company" required/> &nbsp;
-    Age: <input type="number" name = "age" placeholder="Age" required/> </br>
-    Airline name: <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
+    Airplane identification number: <input type="number" name = "airplane_identification_number" placeholder="Airplane identification number"/> &nbsp;
+    Number of seats: <input type="number" name = "number_seats" placeholder="Number of seats"/> </br>
+    Manufacture company: <input type="text" name = "manufacture_company" placeholder="Manufacture company"/> &nbsp;
+    Age: <input type="number" name = "age" placeholder="Age"/> </br>
     <input type="submit" value = "Add new airplane in the system" />
+    {% if planeExistError %}
+        <p class="error"><strong>Error:</strong> {{planeExistError}}</p>
+    {% endif %}
+    {% if addPlaneSucc %}
+        <p class="message">{{addPlaneSucc}}</p>
+    {% endif %}
 </form>
 
 <form class = action action="/add_airport" method="POST">
@@ -105,6 +110,8 @@
     Airport type: <input type="text" name = "airport_type" placeholder="Airport type" required/> <br>
     <input type="submit" value = "Add new airport in the system" />
 </form>
+
+
 <table>
     <th>Rating</th>
     <th>Comment</th>

@@ -461,8 +461,24 @@ Customer logs out of the system
 # output: none
 @app.route('/customer_logout')
 def customer_logout():
-	session.pop('customer_email')
-	return redirect(url_for('customer_logout'))
+	del session['customer_email']
+	return render_template('customer_logout.html')
+
+#TODO: Default show all airplanes
+#Author: Yanglin Tao
+# test: pass
+def default_show_all_airplanes():
+	cursor = conn.cursor();
+	user_name = session['user_name']
+	# find which airline it is 
+	query = 'SELECT airline_name FROM Airline_staff WHERE user_name = %s'
+	cursor.execute(query, (user_name))
+	data = cursor.fetchone()
+	airline = data['airline_name']
+	query = 'SELECT airplane_identification_number, number_seats, manufacture_company, age, airline_name FROM Airplane WHERE airline_name = %s'
+	cursor.execute(query, (airline))
+	airplanes = cursor.fetchall()
+	return airplanes
 
 #TODO: Staff home
 #Author: Yanglin Tao
@@ -470,7 +486,8 @@ def customer_logout():
 @app.route('/staff_home')
 def staff_home():
 	user_name = session['user_name']
-	return render_template('staff_home.html', user_name = user_name)
+	airplanes = default_show_all_airplanes()
+	return render_template('staff_home.html', user_name = user_name, airplanes = airplanes)
 
 #TODO: Staff views flights
 #Author: Yanglin Tao
@@ -489,6 +506,7 @@ all the customers of a particular flight.
 def staff_view_flights():
 	cursor = conn.cursor();
 	user_name = session['user_name']
+	airplanes = default_show_all_airplanes()
 	if request.method == 'POST':
 		start = request.form['start_date']
 		end = request.form['end_date']
@@ -509,9 +527,9 @@ def staff_view_flights():
 			cursor.execute(query, (start, end, dept_airport, arri_airport, airline))
 			data = cursor.fetchall()
 		cursor.close()
-		return render_template('staff_home.html', user_name = user_name, flights = data)
+		return render_template('staff_home.html', user_name = user_name, flights = data, airplanes = airplanes)
 	else:
-		return render_template('staff_home.html', user_name = user_name)
+		return render_template('staff_home.html', user_name = user_name, airplanes = airplanes)
 
 #TODO: Staff creates new flights
 #Author: Yanglin Tao
@@ -530,6 +548,7 @@ future flights operated by the airline he/she works for the next 30 days.
 def create_flight():
 	cursor = conn.cursor();
 	user_name = session['user_name']
+	airplanes = default_show_all_airplanes()
 	if request.method == 'POST':
 		flight_num = request.form['flight_number']
 		dept_airport = request.form['departure_airport']
@@ -550,17 +569,17 @@ def create_flight():
 		data = cursor.fetchone()
 		if(data):
 			error = "This is an existing flight, try another"
-			return render_template('staff_home.html', user_name = user_name, error = error)
+			return render_template('staff_home.html', user_name = user_name, error = error, airplanes = airplanes)
 		else:
 			query = 'INSERT INTO Flight (flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, arrival_time, airplane_identification_number, base_price, airline_name, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NULL)'
 			cursor.execute(query, (flight_num, dept_airport, dept_date, dept_time, arri_airport, arri_date, arri_time, airplane_identifi_num, b_price, airline))
 			conn.commit()
 			cursor.close()
 			message = "Sucessfully added a flight"
-			return render_template('staff_home.html', user_name = user_name, message = message)
+			return render_template('staff_home.html', user_name = user_name, message = message, airplanes = airplanes)
 	else:
 		error = "Invaid data"
-		return render_template('staff_home.html', user_name = user_name, error = error)
+		return render_template('staff_home.html', user_name = user_name, error = error, airplanes = airplanes)
 
 #TODO: Staff changes status of the flight
 #Author: Yanglin Tao
@@ -575,6 +594,7 @@ forms.
 def change_status():
 	cursor = conn.cursor();
 	user_name = session['user_name']
+	airplanes = default_show_all_airplanes()
 	if request.method == 'POST':
 		flight_num = request.form['flight_number']
 		dept_date = request.form['departure_date']
@@ -590,15 +610,16 @@ def change_status():
 			conn.commit()
 			cursor.close()
 			message1 = "Successfully changed the flight status"
-			return render_template('staff_home.html', user_name = user_name, message1 = message1)
+			return render_template('staff_home.html', user_name = user_name, message1 = message1, airplanes = airplanes)
 		else:
 			error1 = "Sorry, cannot find the flight"
-			return render_template('staff_home.html', user_name = user_name, error1 = error1)
+			return render_template('staff_home.html', user_name = user_name, error1 = error1, airplanes = airplanes)
 	else:
 		return render_template('staff_home.html', user_name = user_name)
 
 #TODO: Staff adds new airplane in the system
 #Author: Yanglin Tao
+# test: pass
 '''
 He or she adds a new airplane, providing all the needed data, via forms. 
 The application should prevent unauthorized users from doing this action. In the confirmation page, 
@@ -610,16 +631,34 @@ she/he will be able to see all the airplanes owned by the airline he/she works f
 @app.route('/add_airplane', methods=['GET', 'POST'])
 def add_airplane():
 	cursor = conn.cursor();
-	airplane_identifi_num = request.form['airplane_identification_number']
-	num_of_seats = request.form['number_of_seats']
-	manufact_comp = request.form['manufacture_company']
-	airplane_age = request.form['age']
-	airline = request.form['airline_name']
-	query = 'INSERT INTO Airplane (airplane_identification_number, number_of_seats, manufacture_company, age, airline_name) VALUES (%s, %s, %s, %s, %s)'
-	cursor.execute(query, (airplane_identifi_num, num_of_seats, manufact_comp, airplane_age, airline))
-	conn.commit()
-	cursor.close()
-	return redirect(url_for('staff_home'))
+	user_name = session['user_name']
+	if request.method == 'POST':
+		airplane_identifi_num = request.form['airplane_identification_number']
+		num_of_seats = request.form['number_seats']
+		manufact_comp = request.form['manufacture_company']
+		airplane_age = request.form['age']
+		# find which airline it is 
+		query = 'SELECT airline_name FROM Airline_staff WHERE user_name = %s'
+		cursor.execute(query, (user_name))
+		data = cursor.fetchone()
+		airline = data['airline_name']
+		query = 'SELECT * FROM Airplane WHERE airplane_identification_number = %s AND airline_name = %s'
+		cursor.execute(query, (airplane_identifi_num, airline))
+		data = cursor.fetchone()
+		if (data):
+			planeExistError = "Sorry, this plane already exists. Please try another."
+			airplanes = default_show_all_airplanes()
+			return render_template('staff_home.html', user_name = user_name, planeExistError = planeExistError, airplanes = airplanes)
+		else:
+			query = 'INSERT INTO Airplane (airplane_identification_number, number_seats, manufacture_company, age, airline_name) VALUES (%s, %s, %s, %s, %s)'
+			cursor.execute(query, (airplane_identifi_num, num_of_seats, manufact_comp, airplane_age, airline))
+			conn.commit()
+			cursor.close()
+			addPlaneSucc = 'Successfully added a plane'
+			airplanes = default_show_all_airplanes()
+			return render_template('staff_home.html', user_name = user_name, addPlaneSucc = addPlaneSucc, airplanes = airplanes)
+	else:
+		return render_template('staff_home.html', user_name = user_name)
 
 #################################################################################################################
 
