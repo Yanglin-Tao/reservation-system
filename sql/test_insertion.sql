@@ -28,6 +28,12 @@ insert into Airline_Staff values('worker02',  '67890', 'Jane', 'Doe',  '1992-05-
 insert into staff_phone values('worker02',5169902432);
 insert into staff_email values('worker02', 'janedoe@gmail.com');
 
+INSERT INTO Airline_Staff VALUES ('worker03', '12345', 'James', 'Wayne', '1991-12-02', 'Jet Blue');
+INSERT INTO staff_phone VALUES ('worker03', 3472883737);
+INSERT INTO staff_email VALUES ('worker03', 'jameswayne@gmail.com');
+
+
+
 /*insert Flight*/
 insert into Flight values(350204, 'JFK', '2022-03-20', '22:15:00', 'LAX', '2022-03-21', '03:30:00', 777330, 199,'Jet Blue', 'delayed'); 
 
@@ -35,13 +41,18 @@ insert into Flight values (350206, 'JFK', '2022-07-25', '16:00:00' , 'PVG', '202
 
 insert into Flight values (350220, 'LAX', '2022-05-20', '08:00:00' , 'JFK', '2022-05-20', '14:30:00' ,787010, 199, 'Jet Blue', 'on time');
 
+insert into Flight values (350222, 'LAX', '2022-07-01', '22:00:00' , 'PVG', '2022-07-02', '13:30:00' ,787010, 1100, 'Jet Blue', 'on time');
+
 /*insert Ticket and Purchase records*/
 insert into Ticket values(177602,'yl7685@nyu.edu', 180, 'credit', 82222222232, 'Yuting Li', '2022-12-03', '2022-03-12', '15:00:02', '2022-03-20', '22:15:00',350204, 'Jet Blue');
 
 insert into Ticket values(177688,'tl3119@nyu.edu', 1100, 'debit', 82222228523, 'Tianzuo Liu', '2022-10-12', '2021-12-30', '18:44:02', '2022-07-25', '16:00:00', 350206, 'United Airlines');
 
-insert into Ticket values(195602,'yt2061@nyu.edu', 210, 'credit', 82923622232, 'Yanglin Tao', '2022-12-03', '2022-05-15', '18:00:00', '2022-05-20', '08:00:00',350220, 'Jet Blue');
+insert into Ticket values(195602,'yt2061@nyu.edu', 210, 'credit', 82923622232, 'Yanglin Tao', '2022-12-03', '2022-05-15', '18:00:00', '2022-05-20', '08:00:00', 350220, 'Jet Blue');
+
+insert into Ticket values(195660,'yt2061@nyu.edu', 1100, 'credit', 82923622232, 'Yanglin Tao', '2022-12-03', '2022-06-25', '17:00:00', '2022-07-01', '22:00:00', 350222, 'Jet Blue');
 
 insert into Purchase values('yl7685@nyu.edu', 177602);
 insert into Purchase values('tl3119@nyu.edu', 177688);
 insert into Purchase values('yt2061@nyu.edu', 195602);
+insert into Purchase values('yt2061@nyu.edu', 195660);

@@ -1,4 +1,5 @@
 #Import Flask Library
+from email import message
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 import datetime
@@ -17,12 +18,14 @@ conn = pymysql.connect(host='localhost',
 
 #Define route for index page
 #Author: Yanglin Tao
+# test: pass
 @app.route('/')
 def hello():
 	return render_template('index.html')
 
 #Show all future flights to anyone using the system
 #Author: Yanglin Tao
+# test: pass
 @app.route('/general_show_flights', methods=['GET', 'POST'])
 def general_show_flights():
 	cursor = conn.cursor()
@@ -43,10 +46,9 @@ def general_show_flights():
 	else:
 		return render_template('index.html')
 
-
-
 #Check flight status to anyone using the system
 #Author: Yanglin Tao
+# test: pass
 @app.route('/general_check_status', methods=['GET', 'POST'])
 def general_check_status():
 	cursor = conn.cursor()
@@ -69,30 +71,35 @@ def general_check_status():
 
 #Define route for customer login
 #Author: Yanglin Tao
+# test: pass
 @app.route('/customer_login')
 def customer_login():
 	return render_template('customer_login.html')
 
 #Define route for customer register
 #Author: Yanglin Tao
+# test: pass
 @app.route('/customer_register')
 def customer_register():
 	return render_template('customer_register.html')
 
 #Define route for staff login
 #Author: Yanglin Tao
+# test: pass
 @app.route('/staff_login')
 def staff_login():
 	return render_template('staff_login.html')
 
 #Define route for staff register
 #Author: Yanglin Tao
+# test: pass
 @app.route('/staff_register')
 def staff_register():
 	return render_template('staff_register.html')
 
 #Authenticates customer login
 #Author: Yanglin Tao
+# test: pass
 @app.route('/customer_login_auth', methods=['GET', 'POST'])
 def customer_login_auth():
 	#grabs information from the forms
@@ -120,6 +127,7 @@ def customer_login_auth():
 
 #TODO: Authenticates staff login
 #Author: Tianzuo Liu
+# test: pass
 @app.route('/staff_login_auth', methods=['GET', 'POST'])
 def staff_login_auth():
 	if request.method == 'POST':
@@ -149,6 +157,7 @@ def staff_login_auth():
 
 #TODO: Authenticates customer register
 #Author: Tianzuo Liu
+# test: pass
 @app.route('/customer_register_auth', methods=['GET', 'POST'])
 def customer_register_auth():
 	customer_name = request.form['customer_name']
@@ -187,6 +196,7 @@ def customer_register_auth():
 
 #TODO: Authenticates staff register
 #Author: Tianzuo Liu
+# test: pass
 @app.route('/staff_register_auth', methods=['GET', 'POST'])
 def staff_register_auth():
 	user_name = request.form['user_name']
@@ -214,23 +224,22 @@ def staff_register_auth():
 	else:
 		ins1 = 'INSERT INTO Airline_Staff VALUES(%s, %s, %s, %s, %s, %s)'
 		cursor.execute(ins1, (user_name, staff_password, first_name, last_name, date_of_birth, airline_name))
-		ins2 = 'INSERT INTO staff_phone VALUES(%s, %s)'
-
-		while(staff_phone != None):
-			cursor.execute(ins2, (user_name, staff_phone))
-			staff_phone = request.form['staff_phone']
-		ins3 = 'INSERT INTO staff_email VALUES(%s, %s)'
-
-		while(staff_email != None):
-			cursor.execute(ins3, (user_name, staff_email))
-			staff_email = request.form['staff_email']
-
-		conn.commit()
+		num_list = staff_phone.split(",")
+		for num in num_list:
+			ins2 = 'INSERT INTO staff_phone VALUES(%s, %s)'
+			cursor.execute(ins2, (user_name, num))
+			conn.commit()
+		email_list = staff_email.split(",")
+		for email in email_list:
+			ins3 = 'INSERT INTO staff_email VALUES(%s, %s)'
+			cursor.execute(ins3, (user_name, email))
+			conn.commit()
 		cursor.close()
 		return render_template('index.html')
 
 #TODO: Customer home
 #Author: Tianzuo Liu
+# test: pass
 @app.route('/customer_home')
 def customer_home():
 	customer_email = session['customer_email']
@@ -373,6 +382,7 @@ logged in.
 '''
 # input: flight_number, departure date, departure time, airline name
 # output: none
+# test: pass
 @app.route('/customer_rating', methods=['GET', 'POST'])
 def customer_rating():
 	cursor = conn.cursor();
@@ -456,6 +466,7 @@ def customer_logout():
 
 #TODO: Staff home
 #Author: Yanglin Tao
+# test: pass
 @app.route('/staff_home')
 def staff_home():
 	user_name = session['user_name']
@@ -477,29 +488,30 @@ all the customers of a particular flight.
 @app.route('/staff_view_flights', methods=['GET', 'POST'])
 def staff_view_flights():
 	cursor = conn.cursor();
-	start = request.form['start_date']
-	end = request.form['end_date']
-	dept_airport = request.form['departure_airport']
-	dept_city = request.form['departure_city']
-	arri_airport = request.form['arrival_airport']
-	arri_city = request.form['arrival_city']
-	query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time,\
-			 arrival_airport, customer_email FROM Ticket NATURAL JOIN Customer WHERE departure_date >= CURDATE() DAY AND \
-				departure_date <= DATE(CURDATE()) + 30 DAY'
-	cursor.execute(query)
-	conn.commit()
-	# if there are inputs from user that specifies astart_date, end_date, departure_airport, departure_city, 
-	# arrival_airport, and arrival_city
-	if start != None and end != None and dept_airport != None and dept_city != None and arri_airport != None and \
-		arri_city != None:
-		query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time,\
-			 arrival_airport, customer_email FROM Ticket NATURAL JOIN Customer WHERE departure_date > %s AND departure_date < %s \
-				AND departure_airport = %s AND departure_city = %s AND arrival_airport = %s AND \
-				arrival_city = %s'
-		cursor.execute(query, (start, end, dept_airport, dept_city, arri_airport, arri_city))
-		conn.commit()
-	cursor.close()
-	return redirect(url_for('staff_home'))
+	user_name = session['user_name']
+	if request.method == 'POST':
+		start = request.form['start_date']
+		end = request.form['end_date']
+		dept_airport = request.form['departure_airport']
+		arri_airport = request.form['arrival_airport']
+		# find which airline it is 
+		query = 'SELECT airline_name FROM Airline_staff WHERE user_name = %s'
+		cursor.execute(query, (user_name))
+		data = cursor.fetchone()
+		airline = data['airline_name']
+		# if there are inputs from user that specifies astart_date, end_date, departure_airport, departure_city, 
+		# arrival_airport, and arrival_city
+		query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, customer_email FROM Ticket NATURAL JOIN Customer NATURAL JOIN Flight WHERE departure_date >= CURRENT_DATE() AND departure_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY) AND airline_name = %s'
+		cursor.execute(query, (airline))
+		data = cursor.fetchall()
+		if start != None and end != None and dept_airport != None and arri_airport != None:
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, customer_email FROM Ticket NATURAL JOIN Customer NATURAL JOIN Flight WHERE departure_date >= %s AND departure_date <= %s AND departure_airport = %s AND arrival_airport = %s AND airline_name = %s'
+			cursor.execute(query, (start, end, dept_airport, arri_airport, airline))
+			data = cursor.fetchall()
+		cursor.close()
+		return render_template('staff_home.html', user_name = user_name, flights = data)
+	else:
+		return render_template('staff_home.html', user_name = user_name)
 
 #TODO: Staff creates new flights
 #Author: Yanglin Tao
@@ -513,23 +525,42 @@ future flights operated by the airline he/she works for the next 30 days.
 # input: flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, 
 # 			arrival_time, airplane_identification_number, airline_name
 # output: none
+# test: pass
 @app.route('/add_flight', methods=['GET', 'POST'])
 def create_flight():
 	cursor = conn.cursor();
-	flight_num = request.form['flight_number']
-	dept_airport = request.form['departure_airport']
-	dept_date = request.form['departure_date']
-	dept_time = request.form['departure_time']
-	arri_airport = request.form['arrival_airport']
-	arri_date = request.form['arrival_date']
-	arri_time = request.form['arrival_time']
-	airplane_identifi_num = request.form['airplane_identification_number']
-	airline = request.form['airline_name']
-	query = 'INSERT INTO Flight (flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, arrival_time, airplane_identification_number, airline_name) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
-	cursor.execute(query, (flight_num, dept_airport, dept_date, dept_time, arri_airport, arri_date, arri_time, airplane_identifi_num, airline))
-	conn.commit()
-	cursor.close()
-	return redirect(url_for('staff_home'))
+	user_name = session['user_name']
+	if request.method == 'POST':
+		flight_num = request.form['flight_number']
+		dept_airport = request.form['departure_airport']
+		dept_date = request.form['departure_date']
+		dept_time = request.form['departure_time']
+		arri_airport = request.form['arrival_airport']
+		arri_date = request.form['arrival_date']
+		arri_time = request.form['arrival_time']
+		airplane_identifi_num = request.form['airplane_identification_number']
+		b_price = request.form['base_price']
+		# find which airline it is 
+		query = 'SELECT airline_name FROM Airline_staff WHERE user_name = %s'
+		cursor.execute(query, (user_name))
+		data = cursor.fetchone()
+		airline = data['airline_name']
+		query = 'SELECT * FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+		cursor.execute(query, (flight_num, dept_date, dept_time, airline))
+		data = cursor.fetchone()
+		if(data):
+			error = "This is an existing flight, try another"
+			return render_template('staff_home.html', user_name = user_name, error = error)
+		else:
+			query = 'INSERT INTO Flight (flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, arrival_time, airplane_identification_number, base_price, airline_name, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NULL)'
+			cursor.execute(query, (flight_num, dept_airport, dept_date, dept_time, arri_airport, arri_date, arri_time, airplane_identifi_num, b_price, airline))
+			conn.commit()
+			cursor.close()
+			message = "Sucessfully added a flight"
+			return render_template('staff_home.html', user_name = user_name, message = message)
+	else:
+		error = "Invaid data"
+		return render_template('staff_home.html', user_name = user_name, error = error)
 
 #TODO: Staff changes status of the flight
 #Author: Yanglin Tao
@@ -539,19 +570,32 @@ forms.
 '''
 # input: flight_number, departure_date, departure_time, airline_name, status
 # output: none
+# test: pass
 @app.route('/change_status', methods=['GET', 'POST'])
 def change_status():
 	cursor = conn.cursor();
-	flight_num = request.form['flight_number']
-	dept_date = request.form['departure_date']
-	dept_time = request.form['departure_time']
-	airline = request.form['airline_name']
-	new_status = request.form['flight_status']
-	query = 'INSERT INTO Flight (flight_status) VALUES (%s) WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s' 
-	cursor.execute(query, (new_status, flight_num, dept_date, dept_time, airline))
-	conn.commit()
-	cursor.close()
-	return redirect(url_for('staff_home'))
+	user_name = session['user_name']
+	if request.method == 'POST':
+		flight_num = request.form['flight_number']
+		dept_date = request.form['departure_date']
+		dept_time = request.form['departure_time']
+		airline = request.form['airline_name']
+		new_status = request.form['flight_status']
+		query = 'SELECT * FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+		cursor.execute(query, (flight_num, dept_date, dept_time, airline))
+		data = cursor.fetchone()
+		if (data):
+			query = 'UPDATE Flight SET flight_status = %s WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s' 
+			cursor.execute(query, (new_status, flight_num, dept_date, dept_time, airline))
+			conn.commit()
+			cursor.close()
+			message1 = "Successfully changed the flight status"
+			return render_template('staff_home.html', user_name = user_name, message1 = message1)
+		else:
+			error1 = "Sorry, cannot find the flight"
+			return render_template('staff_home.html', user_name = user_name, error1 = error1)
+	else:
+		return render_template('staff_home.html', user_name = user_name)
 
 #TODO: Staff adds new airplane in the system
 #Author: Yanglin Tao
