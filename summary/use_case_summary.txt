@@ -1,0 +1,88 @@
+use case: /general_show_flights
+desciption: Allows all users to search for future flights based on departure airport, arrival airport, departure date, and 
+arrival date.
+query:
+SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_date = %s AND arrival_airport = %s AND %s > CURRENT_DATE()
+explanation: 
+Select flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, and arrival_airport 
+based on given departure airport, arrival airport, departure date, and arrival date. The departure date will have to be 
+greater than the current date for the results should be future flights.
+
+
+usecase: /general_check_status
+desciption: Allows all users to check the status of a flight based on airline name, flight number, departure date, and
+arrival date.
+query: 
+SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Flight WHERE airline_name = %s AND flight_number = %s AND departure_date = %s AND arrival_date = %s
+explanation:
+Select airline_name, flight_number, departure_date, arrival_date and flight_status based on airline name, flight number, 
+departure date, and arrival date.
+
+usecase: /customer_login_auth
+desciption: Athenticates a customer to login with registered email and password.
+query: SELECT * FROM Customer WHERE customer_email = %s and customer_password = %s
+explanation: If the customer provided email and password matches a value in the database, he/she will be allowed to login.
+
+usecase: /customer_register_auth
+desciption: 
+
+usecase: /staff_login_authen
+desciption: 
+
+usecase: /staff_register_auth
+desciption: 
+
+usecase: /customer_view_flights
+desciption:
+
+usecase: /customer_search_flights
+desciption: 
+
+usecase: /purchase_ticket
+desciption: 
+
+usecase: /cancel_trip
+desciption: 
+
+usecase: /customer_rating
+desciption: 
+
+usecase: /track_spending
+desciption: 
+
+usecase: /customer_logout
+desciption: 
+
+usecase: /staff_view_flights
+desciption: 
+
+usecase: /add_flight
+desciption: 
+
+usecase: /change_status
+desciption: 
+
+usecase: /add_airplane
+desciption: 
+
+usecase: /add_airport
+desciption: 
+
+usecase: /view_rating
+desciption: 
+
+usecase: /frequent_customer
+desciption: 
+
+usecase: /view_customer_flights
+desciption: 
+
+usecase: /view_reports
+desciption: 
+
+usecase: /view_revenue
+desciption: 
+
+usecase: /staff_logout
+desciption: 
+

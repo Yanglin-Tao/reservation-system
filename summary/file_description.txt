@@ -1,26 +1,50 @@
 /init.py
---> Flask app
+--> runs the Flask app
+
 /sql/system.sql
+--> creates tables for the database 'system'
+
 /sql/test_insertion.sql
+--> inserts test data for the database 'system
+
 /static/index_page.jpg
 --> background image
+
 /static/styles.css
 --> stylesheet for user interface
+
 /templates/customer_home.html
 --> generates customer home page
+
 /templates/customer_login.html
 --> generates customer login page
+
 /templates/customer_logout.html
 --> generates customer logout page
+
 /templates/customer_register.html
 --> generates customer register page
+
 /templates/index.html
 --> generates the index page
+
 /templates/staff_home.html
 --> generates staff home page
+
 /templates/staff_login.html
 --> generates staff login page
+
 /templates/staff_logout.html
 --> generates staff logout page
+
 /templates/staff_register.html
 --> generates staff_register page
+
+/README.md
+--> brief desciption of the project
+
+/summary/file_desciption.txt
+--> a list of the files in the application and what’s in each file
+
+/summary/use_case_summary.txt
+-->  lists all of the use cases and the queries executed by them (with brief explanation)

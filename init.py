@@ -370,7 +370,7 @@ def customer_search_flights():
 
 #TODO: Customer purchases a ticket (from result of searching flight)
 #Author: Tianzuo Liu
-@app.route('/customer_search_flights', methods=['GET', 'POST'])
+@app.route('/purchase_ticket', methods=['GET', 'POST'])
 def purchase_ticket():
 	data = customer_search_flights()
 	flight_number = request.form['flight_number']
