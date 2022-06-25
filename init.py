@@ -1,5 +1,6 @@
 #Import Flask Library
 from email import message
+import email
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 import datetime
@@ -149,7 +150,7 @@ def staff_login_auth():
 			return redirect(url_for('staff_home'))
 		else:
 			#returns an error message to the html page
-			error = 'Invalid email address or password'
+			error = 'Invalid username or password'
 			return render_template('staff_login.html', error=error)
 	else:
 		return render_template('staff_login.html')
@@ -237,13 +238,75 @@ def staff_register_auth():
 		cursor.close()
 		return render_template('index.html')
 
+# return customer's total spending last year 
+def spending_last_year():
+	cursor = conn.cursor();
+	email = session['customer_email']
+	query = 'SELECT SUM(sold_price) AS total_last_year FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 YEAR) AND purchase_date <= CURRENT_DATE()'
+	cursor.execute(query, (email))
+	total_last_year = cursor.fetchone()
+	if total_last_year == None:
+		total_last_year = 0
+	total_last_year = total_last_year['total_last_year']
+	cursor.close()
+	return total_last_year
+
+# return customer's spending by month
+def monthly_spending_last_year():
+	cursor = conn.cursor();
+	email = session['customer_email']
+	spending = []
+	# month 1
+	query1 = 'SELECT DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH) AS start_date, DATE_SUB(CURRENT_DATE(), INTERVAL 5 MONTH) AS end_date, SUM(sold_price) AS total FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH) AND purchase_date <= DATE_SUB(CURRENT_DATE(), INTERVAL 5 MONTH)'
+	cursor.execute(query1, (email))
+	# stores purchase date, sold_price of that month
+	month1 = cursor.fetchone()
+	# month 2
+	query2 = 'SELECT DATE_SUB(CURRENT_DATE(), INTERVAL 5 MONTH) AS start_date, DATE_SUB(CURRENT_DATE(), INTERVAL 4 MONTH) AS end_date, SUM(sold_price) AS total FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 5 MONTH) AND purchase_date <= DATE_SUB(CURRENT_DATE(), INTERVAL 4 MONTH)'
+	cursor.execute(query2, (email))
+	# stores purchase date, sold_price of that month
+	month2 = cursor.fetchone()
+	# month 3
+	query3 = 'SELECT DATE_SUB(CURRENT_DATE(), INTERVAL 4 MONTH) AS start_date, DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH) AS end_date, SUM(sold_price) AS total FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 4 MONTH) AND purchase_date <= DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH)'
+	cursor.execute(query3, (email))
+	# stores purchase date, sold_price of that month
+	month3 = cursor.fetchone()
+	# month 4
+	query4 = 'SELECT DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH) AS start_date, DATE_SUB(CURRENT_DATE(), INTERVAL 2 MONTH) AS end_date, SUM(sold_price) AS total FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH) AND purchase_date <= DATE_SUB(CURRENT_DATE(), INTERVAL 2 MONTH)'
+	cursor.execute(query4, (email))
+	# stores purchase date, sold_price of that month
+	month4 = cursor.fetchone()
+	# month 5
+	query5 = 'SELECT DATE_SUB(CURRENT_DATE(), INTERVAL 2 MONTH) AS start_date, DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH) AS end_date, SUM(sold_price) AS total FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 2 MONTH) AND purchase_date <= DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH)'
+	cursor.execute(query5, (email))
+	# stores purchase date, sold_price of that month
+	month5 = cursor.fetchone()
+	# month 6
+	query6 = 'SELECT DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH) AS start_date, CURRENT_DATE() AS end_date, SUM(sold_price) AS total FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH) AND purchase_date <= CURRENT_DATE()'
+	cursor.execute(query6, (email))
+	# stores purchase date, sold_price of that month
+	month6 = cursor.fetchone()
+	spending.append(month1)
+	spending.append(month2)
+	spending.append(month3)
+	spending.append(month4)
+	spending.append(month5)
+	spending.append(month6)
+	for item in spending:
+		if item['total'] == None:
+			item['total'] = 0
+	cursor.close()
+	return spending
+
 #TODO: Customer home
 #Author: Tianzuo Liu
 # test: pass
 @app.route('/customer_home')
 def customer_home():
 	customer_email = session['customer_email']
-	return render_template('customer_home.html', customer_email = customer_email)
+	total_last_year = spending_last_year()
+	spending = monthly_spending_last_year()
+	return render_template('customer_home.html', customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 
 #TODO: Customer view all future flights
 #Author: Tianzuo Liu
@@ -373,8 +436,8 @@ def cancel_trip():
 
 #################################################################################################################
 
-#TODO: Customer gives rating and comment
-#Author: Yanglin Tao
+# TODO: Customer gives rating and comment
+# Author: Yanglin Tao
 '''
 Customer will be able to rate and comment on their 
 previous flights (for which he/she purchased tickets and already took that flight) for the airline they 
@@ -386,6 +449,9 @@ logged in.
 @app.route('/customer_rating', methods=['GET', 'POST'])
 def customer_rating():
 	cursor = conn.cursor();
+	# display default data
+	total_last_year = spending_last_year()
+	spending = monthly_spending_last_year()
 	customer_email = session['customer_email']
 	if request.method == 'POST':
 		flight_num = request.form['flight_number']
@@ -394,25 +460,33 @@ def customer_rating():
 		airline = request.form['airline_name']
 		rate = request.form['rating']
 		comm = request.form['comment']
+		# check if the flight is in the customer's past flights
+		query = 'SELECT * FROM Customer NATURAL JOIN Ticket WHERE customer_email = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s AND %s < CURRENT_DATE()'
+		cursor.execute(query, (customer_email, flight_num, dept_date, dept_time, airline, dept_date))
+		data = cursor.fetchone()
+		if(data):
+			# check if the customer already commented the trip
+			query = 'SELECT * FROM Taken WHERE customer_email = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+			cursor.execute(query, (customer_email, flight_num, dept_date, dept_time, airline))
+			comment = cursor.fetchone()
+			if(comment):
+				commentExistError = 'Sorry, this flight has already been commented or rated. Please try another.'
+				return render_template('customer_home.html', commentExistError = commentExistError, total_last_year = total_last_year, spending = spending)
+			else:
+				query = 'INSERT INTO Taken VALUES(%s, %s, %s, %s, %s, %s, %s)'
+				cursor.execute(query, (customer_email, airline, rate, comm, flight_num, dept_date, dept_time))
+				conn.commit()
+				cursor.close()
+				commentSucc = 'Thanks for your feedback!'
+				return render_template('customer_home.html', commentSucc = commentSucc, total_last_year = total_last_year, spending = spending)
+		else:
+			noFlightError = 'There is no flight you are looking for. Please try again.'
+			return render_template('customer_home.html', noFlightError = noFlightError, total_last_year = total_last_year, spending = spending)
 	else: 
 		return render_template('customer_home.html', customer_email = customer_email)
-	# check if the flight is in the customer's past flights
-	query = 'SELECT * FROM Customer NATURAL JOIN Ticket WHERE customer_email = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s AND %s < CURRENT_DATE()'
-	cursor.execute(query, (customer_email, flight_num, dept_date, dept_time, airline, dept_date))
-	data = cursor.fetchone()
-	if(data):
-		query = 'INSERT INTO Taken VALUES(%s, %s, %s, %s)'
-		cursor.execute(query, (customer_email, airline, rate, comm))
-		conn.commit()
-		cursor.close()
-		message = 'Thanks for your feedback!'
-		return redirect(url_for('customer_home', message = message))
-	else:
-		error = 'Something wrong. Please try again.'
-		return redirect(url_for('customer_home', error = error))
 
-#TODO: Customer tracks spending
-#Author: Yanglin Tao
+# TODO: Customer tracks spending
+# Author: Yanglin Tao
 '''
 Default view will be total amount of money spent in the past year and a bar
 chart/table showing month wise money spent for last 6 months. He/she will also have option to specify 
@@ -422,38 +496,28 @@ month wise money spent within that range
 # default output: total_last_year, monthly_spending_last_year
 # input: start_date, end_date
 # output: total_spending, monthly_spending
+# test: pass
 @app.route('/track_spending', methods=['GET', 'POST'])
 def track_spending():
 	cursor = conn.cursor();
 	email = session['customer_email']
+	total_last_year = spending_last_year()
 	if request.method == 'POST':
-		query1 = 'SELECT SUM(sold_price) AS total_last_year FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 YEAR) AND purchase_date <= CURRENT_DATE()'
-		cursor.execute(query1, (email))
-		# stores total spending in the past year
-		data1 = cursor.fetchone()
-		if data1 == None:
-			data1 = 0
-		# query2 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= CURDATE() - 6 MONTH AND purchase_date <= CURDATE()'
-		query2 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH) AND purchase_date <= CURRENT_DATE()'
-		cursor.execute(query2, (email))
-		# stores purchase date, sold_price in the past 6 months
-		data2 = cursor.fetchall()
 		start = request.form['start_date']
 		end = request.form['end_date']
 		if start != None and end != None:
-			query3 = 'SELECT purchase_date, sold_price FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= %s AND purchase_date <= %s'
-			cursor.execute(query3, (email, start, end))
+			query = 'SELECT %s AS start_date, %s AS end_date, SUM(sold_price) AS total FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= %s AND purchase_date <= %s'
+			cursor.execute(query, (start, end, email, start, end))
 			# stores purchase date, sold_price in a given date range
-			data2 = cursor.fetchall()
-			if data2 == None:
-				data2 = 0
+			data = cursor.fetchall()
 		cursor.close()
-		return render_template('customer_home.html', customer_email = email, total_last_year = data1, spending = data2)
+		return render_template('customer_home.html', customer_email = email, spending = data, total_last_year = total_last_year)
 	else:
-		return render_template('customer_home.html', customer_email = email)
+		return render_template('customer_home.html', customer_email = email, total_last_year = total_last_year)
 
-#TODO: Customer logout
-#Author: Yanglin Tao
+# TODO: Customer logout
+# Author: Yanglin Tao
+# test: pass
 '''
 Customer logs out of the system
 '''
@@ -464,8 +528,8 @@ def customer_logout():
 	del session['customer_email']
 	return render_template('customer_logout.html')
 
-#TODO: Default show all airplanes
-#Author: Yanglin Tao
+# TODO: Default show all airplanes
+# Author: Yanglin Tao
 # test: pass
 def default_show_all_airplanes():
 	cursor = conn.cursor();
@@ -478,19 +542,49 @@ def default_show_all_airplanes():
 	query = 'SELECT airplane_identification_number, number_seats, manufacture_company, age, airline_name FROM Airplane WHERE airline_name = %s'
 	cursor.execute(query, (airline))
 	airplanes = cursor.fetchall()
+	cursor.close()
 	return airplanes
 
-#TODO: Staff home
-#Author: Yanglin Tao
+# Default show all flights in the next 30 days
+# Author: Yanglin Tao
+def default_view_30days():
+	cursor = conn.cursor();
+	user_name = session['user_name']
+	# find which airline it is 
+	query = 'SELECT airline_name FROM Airline_staff WHERE user_name = %s'
+	cursor.execute(query, (user_name))
+	data = cursor.fetchone()
+	airline = data['airline_name']
+	query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date >= CURRENT_DATE() AND departure_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY) AND airline_name = %s'
+	cursor.execute(query, (airline))
+	flights = cursor.fetchall()
+	for i in range(len(flights)):
+		flight_num = flights[i]['flight_number']
+		dept_date = flights[i]['departure_date']
+		dept_time = flights[i]['departure_time']
+		query = 'SELECT customer_email FROM Ticket WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+		cursor.execute(query, (flight_num, dept_date, dept_time, airline))
+		customers = cursor.fetchall()
+		customer_list = []
+		for j in range(len(customers)):
+			customer_list.append(customers[j]['customer_email'])
+		flights[i]['customer_email'] = customer_list
+
+	cursor.close()
+	return flights
+
+# TODO: Staff home
+# Author: Yanglin Tao
 # test: pass
 @app.route('/staff_home')
 def staff_home():
 	user_name = session['user_name']
 	airplanes = default_show_all_airplanes()
-	return render_template('staff_home.html', user_name = user_name, airplanes = airplanes)
+	flights = default_view_30days()
+	return render_template('staff_home.html', user_name = user_name, airplanes = airplanes, flights = flights)
 
-#TODO: Staff views flights
-#Author: Yanglin Tao
+# TODO: Staff views flights
+# Author: Yanglin Tao
 '''
 Defaults will be showing all the future flights operated by the airline he/she works for 
 the next 30 days. He/she will be able to see all the current/future/past flights operated by the airline 
@@ -507,6 +601,7 @@ def staff_view_flights():
 	cursor = conn.cursor();
 	user_name = session['user_name']
 	airplanes = default_show_all_airplanes()
+	flights = default_view_30days()
 	if request.method == 'POST':
 		start = request.form['start_date']
 		end = request.form['end_date']
@@ -517,22 +612,30 @@ def staff_view_flights():
 		cursor.execute(query, (user_name))
 		data = cursor.fetchone()
 		airline = data['airline_name']
-		# if there are inputs from user that specifies astart_date, end_date, departure_airport, departure_city, 
+		# if there are inputs from user that specifies start_date, end_date, departure_airport, departure_city, 
 		# arrival_airport, and arrival_city
-		query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, customer_email FROM Ticket NATURAL JOIN Customer NATURAL JOIN Flight WHERE departure_date >= CURRENT_DATE() AND departure_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY) AND airline_name = %s'
-		cursor.execute(query, (airline))
-		data = cursor.fetchall()
 		if start != None and end != None and dept_airport != None and arri_airport != None:
-			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, customer_email FROM Ticket NATURAL JOIN Customer NATURAL JOIN Flight WHERE departure_date >= %s AND departure_date <= %s AND departure_airport = %s AND arrival_airport = %s AND airline_name = %s'
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date >= %s AND departure_date <= %s AND departure_airport = %s AND arrival_airport = %s AND airline_name = %s'
 			cursor.execute(query, (start, end, dept_airport, arri_airport, airline))
-			data = cursor.fetchall()
+			flights = cursor.fetchall()
+			for i in range(len(flights)):
+				flight_num = flights[i]['flight_number']
+				dept_date = flights[i]['departure_date']
+				dept_time = flights[i]['departure_time']
+				query = 'SELECT customer_email FROM Ticket WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+				cursor.execute(query, (flight_num, dept_date, dept_time, airline))
+				customers = cursor.fetchall()
+				customer_list = []
+				for j in range(len(customers)):
+					customer_list.append(customers[j]['customer_email'])
+				flights[i]['customer_email'] = customer_list
 		cursor.close()
-		return render_template('staff_home.html', user_name = user_name, flights = data, airplanes = airplanes)
+		return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
 	else:
-		return render_template('staff_home.html', user_name = user_name, airplanes = airplanes)
+		return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
 
-#TODO: Staff creates new flights
-#Author: Yanglin Tao
+# TODO: Staff creates new flights
+# Author: Yanglin Tao
 '''
 He or she creates a new flight, providing all the needed data, via forms. The 
 application should prevent unauthorized users from doing this action. Defaults will be showing all the 
@@ -549,6 +652,7 @@ def create_flight():
 	cursor = conn.cursor();
 	user_name = session['user_name']
 	airplanes = default_show_all_airplanes()
+	flights = default_view_30days()
 	if request.method == 'POST':
 		flight_num = request.form['flight_number']
 		dept_airport = request.form['departure_airport']
@@ -564,25 +668,33 @@ def create_flight():
 		cursor.execute(query, (user_name))
 		data = cursor.fetchone()
 		airline = data['airline_name']
+		# check if this is an existing flight
 		query = 'SELECT * FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
 		cursor.execute(query, (flight_num, dept_date, dept_time, airline))
 		data = cursor.fetchone()
 		if(data):
-			error = "This is an existing flight, try another"
-			return render_template('staff_home.html', user_name = user_name, error = error, airplanes = airplanes)
+			flightExistError = "This is an existing flight, try another"
+			return render_template('staff_home.html', user_name = user_name, flightExistError = flightExistError, airplanes = airplanes, flights = flights)
 		else:
-			query = 'INSERT INTO Flight (flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, arrival_time, airplane_identification_number, base_price, airline_name, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NULL)'
-			cursor.execute(query, (flight_num, dept_airport, dept_date, dept_time, arri_airport, arri_date, arri_time, airplane_identifi_num, b_price, airline))
-			conn.commit()
-			cursor.close()
-			message = "Sucessfully added a flight"
-			return render_template('staff_home.html', user_name = user_name, message = message, airplanes = airplanes)
+			# check if the airplane exist in the system
+			query = 'SELECT * FROM Airplane WHERE airplane_identification_number = %s AND airline_name = %s'
+			cursor.execute(query, (airplane_identifi_num, airline))
+			planeExist = cursor.fetchone()
+			if (planeExist):
+				query = 'INSERT INTO Flight (flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, arrival_time, airplane_identification_number, base_price, airline_name, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NULL)'
+				cursor.execute(query, (flight_num, dept_airport, dept_date, dept_time, arri_airport, arri_date, arri_time, airplane_identifi_num, b_price, airline))
+				conn.commit()
+				cursor.close()
+				addFlightSucc = "Sucessfully added a flight"
+				return render_template('staff_home.html', user_name = user_name, addFlightSucc = addFlightSucc, airplanes = airplanes, flights = flights)
+			else:
+				noPlaneError = 'This is a new airplane. Please add to the system first or try another.'
+				return render_template('staff_home.html', user_name = user_name, noPlaneError = noPlaneError, airplanes = airplanes, flights = flights)
 	else:
-		error = "Invaid data"
-		return render_template('staff_home.html', user_name = user_name, error = error, airplanes = airplanes)
+		return render_template('staff_home.html', user_name = user_name, airplanes = airplanes, flights = flights)
 
-#TODO: Staff changes status of the flight
-#Author: Yanglin Tao
+# TODO: Staff changes status of the flight
+# Author: Yanglin Tao
 '''
 He or she changes a flight status (from on-time to delayed or vice versa) via 
 forms.
@@ -595,6 +707,7 @@ def change_status():
 	cursor = conn.cursor();
 	user_name = session['user_name']
 	airplanes = default_show_all_airplanes()
+	flights = default_view_30days()
 	if request.method == 'POST':
 		flight_num = request.form['flight_number']
 		dept_date = request.form['departure_date']
@@ -609,16 +722,16 @@ def change_status():
 			cursor.execute(query, (new_status, flight_num, dept_date, dept_time, airline))
 			conn.commit()
 			cursor.close()
-			message1 = "Successfully changed the flight status"
-			return render_template('staff_home.html', user_name = user_name, message1 = message1, airplanes = airplanes)
+			changeStatusSucc = "Successfully changed the flight status"
+			return render_template('staff_home.html', user_name = user_name, changeStatusSucc = changeStatusSucc, airplanes = airplanes, flights = flights)
 		else:
-			error1 = "Sorry, cannot find the flight"
-			return render_template('staff_home.html', user_name = user_name, error1 = error1, airplanes = airplanes)
+			changeStatusError = "Sorry, cannot find the flight"
+			return render_template('staff_home.html', user_name = user_name, changeStatusError = changeStatusError, airplanes = airplanes, flights = flights)
 	else:
-		return render_template('staff_home.html', user_name = user_name)
+		return render_template('staff_home.html', user_name = user_name, airplanes = airplanes, flights = flights)
 
-#TODO: Staff adds new airplane in the system
-#Author: Yanglin Tao
+# TODO: Staff adds new airplane in the system
+# Author: Yanglin Tao
 # test: pass
 '''
 He or she adds a new airplane, providing all the needed data, via forms. 
@@ -632,6 +745,8 @@ she/he will be able to see all the airplanes owned by the airline he/she works f
 def add_airplane():
 	cursor = conn.cursor();
 	user_name = session['user_name']
+	airplanes = default_show_all_airplanes()
+	flights = default_view_30days()
 	if request.method == 'POST':
 		airplane_identifi_num = request.form['airplane_identification_number']
 		num_of_seats = request.form['number_seats']
@@ -642,13 +757,13 @@ def add_airplane():
 		cursor.execute(query, (user_name))
 		data = cursor.fetchone()
 		airline = data['airline_name']
+		# check if an airplane already exist in the system
 		query = 'SELECT * FROM Airplane WHERE airplane_identification_number = %s AND airline_name = %s'
 		cursor.execute(query, (airplane_identifi_num, airline))
 		data = cursor.fetchone()
 		if (data):
 			planeExistError = "Sorry, this plane already exists. Please try another."
-			airplanes = default_show_all_airplanes()
-			return render_template('staff_home.html', user_name = user_name, planeExistError = planeExistError, airplanes = airplanes)
+			return render_template('staff_home.html', user_name = user_name, planeExistError = planeExistError, airplanes = airplanes, flights = flights)
 		else:
 			query = 'INSERT INTO Airplane (airplane_identification_number, number_seats, manufacture_company, age, airline_name) VALUES (%s, %s, %s, %s, %s)'
 			cursor.execute(query, (airplane_identifi_num, num_of_seats, manufact_comp, airplane_age, airline))
@@ -656,9 +771,9 @@ def add_airplane():
 			cursor.close()
 			addPlaneSucc = 'Successfully added a plane'
 			airplanes = default_show_all_airplanes()
-			return render_template('staff_home.html', user_name = user_name, addPlaneSucc = addPlaneSucc, airplanes = airplanes)
+			return render_template('staff_home.html', user_name = user_name, addPlaneSucc = addPlaneSucc, airplanes = airplanes, flights = flights)
 	else:
-		return render_template('staff_home.html', user_name = user_name)
+		return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
 
 #################################################################################################################
 

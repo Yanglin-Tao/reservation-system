@@ -87,33 +87,34 @@
         Rating: <input type="number" name = "rating" placeholder="Rating" required/> &nbsp;
         Comment: <input type="text" name = "comment" placeholder="Comment" required/> <br>
         <input type="submit" value = "Rate and comment my trip" />
-        {% if error %}
-        <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% if noFlightError %}
+        <p class="error"><strong>Error:</strong> {{noFlightError}}</p>
         {% endif %}
-        {% if message %}
-        <p class="message">{{message}}</p>
+        {% if commentExistError %}
+        <p class="error"><strong>Error:</strong> {{commentExistError}}</p>
+        {% endif %}
+        {% if commentSucc %}
+        <p class="message">{{commentSucc}}</p>
         {% endif %}
     </form>
     
     <table>
         <th>Total spending last year</th>
-        {% for line in total_last_year %}
         <tr>
-            <td>{{line[0]}}</td>
+            <td>{{total_last_year}}</td>
         </tr>
-        {% endfor %}
+
     </table>
     <br>
     <table>
-        <th>Date</th>
+        <th>Start date</th>
+        <th>End date</th>
         <th>Money spent</th>
-        {% if error %}
-        <p class="error"><strong>Error:</strong> {{error}}</p>
-        {% endif %}
         {% for line in spending %}
         <tr>
-            <td>{{line['purchase_date']}}</td>
-            <td>{{line['sold_price']}}</td>
+            <td>{{line['start_date']}}</td>
+            <td>{{line['end_date']}}</td>
+            <td>{{line['total']}}</td>
         </tr>
         {% endfor %}
     </table>

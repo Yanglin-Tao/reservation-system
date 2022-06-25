@@ -49,11 +49,14 @@
     <br>
     Base price: <input type="number" name = "base_price" placeholder="Base price" required/> <br>
     <input type="submit" value = "Create new flights" />
-    {% if error %}
-        <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% if flightExistError %}
+        <p class="error"><strong>Error:</strong> {{flightExistError}}</p>
     {% endif %}
-    {% if message %}
-        <p class="message">{{message}}</p>
+    {% if noPlaneError %}
+        <p class="error"><strong>Error:</strong> {{noPlaneError}}</p>
+    {% endif %}
+    {% if addFlightSucc %}
+        <p class="message">{{addFlightSucc}}</p>
     {% endif %}
 </form>
 
@@ -64,11 +67,11 @@
     Airline name：<input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
     Flight status：<input type="text" name = "flight_status" placeholder="Flight status" required/> <br>
     <input type="submit" value = "Change status of the flight" />
-    {% if error1 %}
-        <p class="error"><strong>Error:</strong> {{error1}}</p>
+    {% if changeStatusError %}
+        <p class="error"><strong>Error:</strong> {{changeStatusError}}</p>
     {% endif %}
-    {% if message1 %}
-        <p class="message">{{message1}}</p>
+    {% if changeStatusSucc %}
+        <p class="message">{{changeStatusSucc}}</p>
     {% endif %}
 </form>
 
