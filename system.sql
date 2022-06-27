@@ -112,6 +112,10 @@ create table Taken(
   airline_name varchar(200),
   rating numeric(1,0),
   comment varchar(1000),
+  flight_number numeric(50,0),
+  departure_date date,
+  departure_time time,
   foreign key(customer_email) references Customer(customer_email),
-  foreign key(airline_name) references Airline(airline_name)
-);
+  foreign key(airline_name) references Airline(airline_name),
+  foreign key(flight_number, departure_date, departure_time, airline_name) references Ticket(flight_number, departure_date, departure_time, airline_name)
+  );

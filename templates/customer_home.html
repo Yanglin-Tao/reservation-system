@@ -3,99 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <title>Customer Home</title>
-    <link rel="stylesheet" type = "text/css" href="{{ url_for('static', filename = 'styles.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'styles.css')}}">
 </head>
 <body style="background-image:url('/static/index_page.jpg'); background-size: cover; background-color: #bfbebe; background-blend-mode: multiply;">
-<form class = action action="/customer_home">
-    <h1 class = heading>Welcome, {{customer_email}}</h1>
-</form>
-<table>
-    <th>Flight number</th>
-    <th>Departure date</th>
-    <th>Departure airport</th>
-    <th>Arrival date</th>
-    <th>Arrival airport</th>
-    {% for line in flights %}
-    <tr>
-        <td>{{line['flight_number']}}</td>
-        <td>{{line['departure_date']}}</td>
-        <td>{{line['departure_airport']}}</td>
-        <td>{{line['arrival_date']}}</td>
-        <td>{{line['arrival_airport']}}</td>
-    </tr>
-    {% endfor %}
-
-</table>
-<form class = action action="/customer_view_flights" method="POST">
-    <input type="submit" value = "View my flights" />
-</form>
-<table>
-    <th>Flight number</th>
-    <th>Departure date</th>
-    <th>Departure airport</th>
-    <th>Arrival date</th>
-    <th>Arrival airport</th>
-    {% for line in flights %}
-    <tr>
-        <td>{{line['flight_number']}}</td>
-        <td>{{line['departure_date']}}</td>
-        <td>{{line['departure_airport']}}</td>
-        <td>{{line['arrival_date']}}</td>
-        <td>{{line['arrival_airport']}}</td>
-    </tr>
-    {% endfor %}
-</table>
-<form class = action action="/customer_search_flights" method="POST">
-    <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
-    <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> <br>
-    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
-    <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
-    <input type="submit" value = "Search for flights" /> &nbsp;
-    <input type="submit" value = "Purchase tickets" /> &nbsp;
-</form>
-
-<form class = action action="/cancel_trip" method="POST">
-    <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
-    <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> <br>
-    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
-    <input type="text" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
-    <input type="submit" value = "Cancel my trip" />
-</form>
-
-<form class = action action="/customer_rating" method="POST">
-    <input type="text" name = "flight_number" placeholder="Flight number" required/> &nbsp;
-    <input type="text" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> <br>
-    <input type="text" name = "departure_time" placeholder="Departure time" required/> &nbsp;
-    <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
-    <input type="text" name = "rating" placeholder="Rating" required/> <br>
-    <input type="text" name = "comment" placeholder="Comment" required/> <br>
-    <input type="submit" value = "Rate and comment my trip" />
-</form>
-<table>
-    <th>Total spending last year</th>
-    <tr>
-        <td>total_last_year</td>
-    </tr>
-</table>
-<br>
-<table>
-    <th>Date</th>
-    <th>Money spent</th>
-    {% for line in spending %}
+    <form class=action action="/customer_home">
+        <h1 class=heading>Welcome, {{customer_email}}</h1>
+    </form>
+    <table>
+        <th>Flight number</th>
+        <th>Departure date</th>
+        <th>Departure airport</th>
+        <th>Arrival date</th>
+        <th>Arrival airport</th>
+        {% for line in future_flights %}
         <tr>
-            <td>{{line['purchase_date']}}</td>
-            <td>{{line['sold_price']}}</td>
+            <td>{{line['flight_number']}}</td>
+            <td>{{line['departure_date']}}</td>
+            <td>{{line['departure_airport']}}</td>
+            <td>{{line['arrival_date']}}</td>
+            <td>{{line['arrival_airport']}}</td>
         </tr>
-    {% endfor %}
-</table>
+        {% endfor %}
+    </table>
+    <form class=action action="/customer_view_flights" method="POST">
+        <input type="submit" value="View my flights" />
+        {% if no_future_error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+    </form>
+    <table>
+        <th>Flight number</th>
+        <th>Departure date</th>
+        <th>Departure airport</th>
+        <th>Arrival date</th>
+        <th>Arrival airport</th>
+        {% for line in search_flights %}
+        <tr>
+            <td>{{line['flight_number']}}</td>
+            <td>{{line['departure_date']}}</td>
+            <td>{{line['departure_airport']}}</td>
+            <td>{{line['arrival_date']}}</td>
+            <td>{{line['arrival_airport']}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <form class=action action="/customer_search_flights" method="POST">
+        Departure airport：<input type="text" name="departure_airport" placeholder="Departure airport" required /> &nbsp;
+        Arrival airport：<input type="text" name="arrival_airport" placeholder="Arrival airport" required /> <br>
+        Departure date: <input type="date" name="departure_date" placeholder="Departure date: YYYY-MM-DD" required /> &nbsp;
+        Arrival date: <input type="date" name="arrival_date" placeholder="Arrival date: YYYY-MM-DD" required /> <br>
+        <input type="submit" value="Search for flights" /> &nbsp;
+        {% if no_search_error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+        <input type="submit" value="Purchase tickets" /> &nbsp;
+        {% if no_purchase_error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+        {% if purchase_message %}
+        <p class="purchase_message">{{purchase_message}}</p>
+        {% endif %}
+    </form>
 
-<form class = action action="/track_spending" method="POST">
-    <input type="text" name = "start_date" placeholder="From: YYYY-MM-DD" required/> &nbsp;
-    <input type="text" name = "end_date" placeholder="To: YYYY-MM-DD" required/> <br>
-    <input type="submit" value = "Track my spending" />
-</form>
-<form class = action action="/customer_logout" method="POST">
-    <input type="submit" value = "Logout" />
-</form>
+    <form class=action action="/cancel_trip" method="POST">
+        Departure airport: <input type="text" name="departure_airport" placeholder="Departure airport" required /> &nbsp;
+        Arrival airport: <input type="text" name="arrival_airport" placeholder="Arrival airport" required /> <br>
+        Departure date: <input type="date" name="departure_date" placeholder="Departure date: YYYY-MM-DD" required /> &nbsp;
+        Arrival date: <input type="date" name="arrival_date" placeholder="Arrival date: YYYY-MM-DD" required /> <br>
+        <input type="submit" value="Cancel my trip" />
+        {% if no_cancel_error %}
+        <p class="no_cancel_error"><strong>Error:</strong> {{no_cancel_error}}</p>
+        {% endif %}
+        {% if cancel_message %}
+        <p class="cancel_message">{{cancel_message}}</p>
+        {% endif %}
+    </form>
+
+    <form class=action action="/customer_rating" method="POST">
+        Flight number: <input type="number" name="flight_number" placeholder="Flight number" required /> &nbsp;
+        Departure date: <input type="date" name="departure_date" placeholder="Departure date: YYYY-MM-DD" required /> <br>
+        Departure time: <input type="time" name="departure_time" placeholder="Departure time" required /> &nbsp;
+        Airline name: <input type="text" name="airline_name" placeholder="Airline name" required /> <br>
+        Rating: <input type="number" name="rating" placeholder="Rating" required /> &nbsp;
+        Comment: <input type="text" name="comment" placeholder="Comment" required /> <br>
+        <input type="submit" value="Rate and comment my trip" />
+        {% if noFlightError %}
+        <p class="error"><strong>Error:</strong> {{noFlightError}}</p>
+        {% endif %}
+        {% if commentExistError %}
+        <p class="error"><strong>Error:</strong> {{commentExistError}}</p>
+        {% endif %}
+        {% if commentSucc %}
+        <p class="message">{{commentSucc}}</p>
+        {% endif %}
+    </form>
+
+    <table>
+        <th>Total spending last year</th>
+        <tr>
+            <td>{{total_last_year}}</td>
+        </tr>
+
+    </table>
+    <br>
+    <table>
+        <th>Start date</th>
+        <th>End date</th>
+        <th>Money spent</th>
+        {% for line in spending %}
+        <tr>
+            <td>{{line['start_date']}}</td>
+            <td>{{line['end_date']}}</td>
+            <td>{{line['total']}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <form class=action action="/track_spending" method="POST">
+        From: <input type="date" name="start_date" placeholder="From: YYYY-MM-DD" /> &nbsp;
+        To: <input type="date" name="end_date" placeholder="To: YYYY-MM-DD" /> <br>
+        <input type="submit" value="Track my spending" />
+    </form>
+    <form class=action action="/customer_logout">
+        <input type="submit" value="Logout" />
+    </form>
 </body>
 </html>
