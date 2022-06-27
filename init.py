@@ -11,8 +11,8 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-					   port = 8889,
-                       password='root',
+					   port = 3306,
+                       password='',
                        db='system',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -310,29 +310,27 @@ def customer_home():
 
 #TODO: Customer view all future flights
 #Author: Tianzuo Liu
-@app.route('/customer_view_flights')
+@app.route('/customer_view_flights', methods=['GET', 'POST'])
 def customer_view_flights():
-	flight_number = request.form['flight_number']
-	query = 'SELECT ticket_ID FROM Ticket \
-              WHERE customer_email = %s and flight_number = %s'
 	cursor = conn.cursor()
-	cursor.execute(query, (session['username'], flight_number))
-	data = cursor.fetchone()
+	customer_email = session['customer_email']
+	if request.method == 'POST':
 
-	query ='SELECT * FROM Ticket \
-	WHERE customer_email = %s and ticket_ID = %s'
-	cursor = conn.cursor()
-	cursor.execute(query, (session['username'], data['ticket_ID']))
-	new_data = cursor.fetchone()
+		query ='SELECT * FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_date >= CURDATE()'
+		cursor.execute(query, (session['customer_email']))
+		future_flights = cursor.fetchall()
 
-	if(new_data):
-		return new_data;
+		if(future_flights):
+			return render_template('customer_home.html', future_flights = future_flights, customer_email = customer_email)
+		else:
+			no_future_error = 'No future flight'
+		return render_template('customer_home.html', no_future_error = no_future_error, customer_email = customer_email)
 	else:
-		message = 'No previous flight'
-		return render_template('customer_home.html', message = message)
+		return render_template('index.html')
 
 #TODO: Customer searches for flights
 #Author: Tianzuo Liu
+#test: pass for round trip
 '''
 Search for future flights (one way or round trip) based on source city/airport name, 
 destination city/airport name, dates (departure or return).
@@ -341,98 +339,107 @@ destination city/airport name, dates (departure or return).
 # Output: flight_number, departure_airport, departure date, arrival date, arrival airport
 @app.route('/customer_search_flights', methods=['GET', 'POST'])
 def customer_search_flights():
-	departure_airport = request.form['departure_airport']
-	arrival_airport = request.form['arrival_airport']
-	daparture_date = request.form['daparture_date']
-	arrival_date = request.form['arrival_date']
-
-	#cursor used to send queries
 	cursor = conn.cursor()
-	#executes query
-	if (arrival_date != None):
-		query = 'SELETCT * \
-		From Flight WHERE departure_airport = %s and arrival_airport = %s and departure_date = %s and arrival_data = %s \
-		and departure_date >= CURDATE()'
-		cursor.execute(query, (departure_airport, arrival_airport, daparture_date, arrival_date))
+	if request.method == 'POST':
+		departure_airport = request.form['departure_airport']
+		arrival_airport = request.form['arrival_airport']
+		departure_date = request.form['departure_date']
+		arrival_date = request.form['arrival_date']
+		customer_email = session['customer_email']
+		
+		#executes query
+		if (arrival_date != None):
+			query = 'SELECT * From Flight WHERE departure_airport = %s and arrival_airport = %s and departure_date = %s and arrival_date = %s and departure_date >= CURDATE()'
+			cursor.execute(query, (departure_airport, arrival_airport, departure_date, arrival_date))
+		else:
+			query = 'SELECT * From Flight WHERE departure_airport = %s and arrival_airport = %s and departure_date = %s and departure_date >= CURDATE()'
+			cursor.execute(query, (departure_airport, arrival_airport, departure_date))
+		#stores the results in a variable
+		search_flights = cursor.fetchall()
+		cursor.close()
+		
+		if(search_flights):
+			return render_template('customer_home.html', search_flights = search_flights, customer_email = customer_email)
+		else:
+			no_search_error = 'Could not find the flight'
+			return render_template('customer_home.html', no_search_error = no_search_error, customer_email = customer_email)
 	else:
-		query = 'SELETCT * \
-		From Flight WHERE departure_airport = %s and arrival_airport = %s and departure_date = %s \
-		and departure_date >= CURDATE()'
-		cursor.execute(query, (departure_airport, arrival_airport, daparture_date))
-	#stores the results in a variable
-	data = cursor.fetchall()
-	cursor.close()
-	if(data):
-		return data
-	else:
-		error = 'Could not find the flight'
-		return render_template('customer_home.html', error = error)
+		return render_template('index.html')
 
 #TODO: Customer purchases a ticket (from result of searching flight)
 #Author: Tianzuo Liu
 @app.route('/purchase_ticket', methods=['GET', 'POST'])
 def purchase_ticket():
-	data = customer_search_flights()
-	flight_number = request.form['flight_number']
-	card_type = request.form['card_type']
-	card_number = request.form['card_number']
-	expiration_date = request.form['expiration_date']
-	name_on_card = request.form['name_on_card']
-	sold_price = request.form['sold_price']
-	airline_name = request.form['airline_name']
-	#cursor used to send queries
-	
 	cursor = conn.cursor()
-	customer_email = session['customer_email']
+	if request.method == 'POST':
+		data = customer_search_flights()
+		flight_number = request.form['flight_number']
+		card_type = request.form['card_type']
+		card_number = request.form['card_number']
+		expiration_date = request.form['expiration_date']
+		name_on_card = request.form['name_on_card']
+		sold_price = request.form['sold_price']
+		airline_name = request.form['airline_name']
+		
+		customer_email = session['customer_email']
 
-	query = 'SELECT * \
-	FROM data WHERE flight_number = %s'
-	cursor.execute(query, (flight_number))
+		query = 'SELECT * FROM data WHERE flight_number = %s'
+		cursor.execute(query, (flight_number))
 	
-	new_data = cursor.fetchone()
-	ticket_ID = str(random.randint(0,9999999))
+		new_data = cursor.fetchone()
+		ticket_ID = str(random.randint(0,9999999))
 
-	if (new_data):
-		insertion = 'INSERT INTO Ticket VALUES \
-		(%s, %s, %s, %s, %s, %s, %s, CURDATE(), CURDATE(), %s, %s, %s, %s)'
-		cursor.execute(insertion, (ticket_ID, customer_email, sold_price, card_type, card_number, \
-			name_on_card, expiration_date, new_data['departure_date'], new_data['departure_time'],flight_number, airline_name))
-		conn.commit()
+		if (new_data):
+			insertion = 'INSERT INTO Ticket VALUES (%s, %s, %s, %s, %s, %s, %s, CURDATE(), CURDATE(), %s, %s, %s, %s)'
+			cursor.execute(insertion, (ticket_ID, customer_email, sold_price, card_type, card_number, \
+				name_on_card, expiration_date, new_data['departure_date'], new_data['departure_time'],flight_number, airline_name))
+			conn.commit()
 
-		purchase = 'INSERT INTO Purchase VALUES(%s, %s)'
-		cursor.execute(purchase, (customer_email, ticket_ID))
-		conn.commit()
-		cursor.close()
-		message = 'Successfully'
-		return render_template('customer_home.html', message = message)
+			purchase = 'INSERT INTO Purchase VALUES(%s, %s)'
+			cursor.execute(purchase, (customer_email, ticket_ID))
+			conn.commit()
+			cursor.close()
+			purchase_message = 'Successfully'
+			return render_template('customer_home.html', purchase_message = purchase_message, customer_email = customer_email)
+		else:
+			no_purchase_error = 'something wrong. Please try again'
+			return render_template('customer_home.html', no_purchase_error = no_purchase_error, customer_email = customer_email)
 	else:
-		error = 'something wrong. Please try again'
-		return render_template('customer_home.html', error = error)
+		return render_template('index.html')
 
 #TODO: Customer cancels a trip
 #Author: Tianzuo Liu
+#test: pass for round trip
 @app.route('/cancel_trip', methods=['GET', 'POST'])
 def cancel_trip():
-	flight_number = request.form['flight_number']
-	query = 'SELECT ticket_ID FROM Ticket \
-              WHERE customer_email = %s and flight_number = %s'
-
 	cursor = conn.cursor()
-	cursor.execute(query, (session['username'], flight_number))
-	data = cursor.fetchone()
-   
-	query = 'DELETE FROM Purchase \
-             WHERE ticket_ID = %s'
-	cursor.execute(query, (data['ticket_ID']))
-	query = 'DELETE FROM Ticket \
-             WHERE ticket_ID = %s'
-	cursor.execute(query, (data['ticket_ID']))
-	cursor.close()
+	if request.method == 'POST':
+		departure_airport = request.form['departure_airport']
+		arrival_airport = request.form['arrival_airport']
+		departure_date = request.form['departure_date']
+		arrival_date = request.form['arrival_date']
 
-	message = 'Successfully deleted'
+		customer_email = session['customer_email']
+		query = 'SELECT ticket_ID FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_airport = %s and arrival_airport = %s and departure_date = %s and arrival_date = %s and departure_date >= CURDATE()'
 
-	return render_template("customer_home.html", message = message)
-    
+		cursor.execute(query, (session['customer_email'], departure_airport, arrival_airport, departure_date, arrival_date))
+		data = cursor.fetchone()
+
+		if(data):
+			query = 'DELETE FROM Purchase WHERE ticket_ID = %s'
+			cursor.execute(query, (data['ticket_ID']))
+			query = 'DELETE FROM Ticket WHERE ticket_ID = %s'
+			cursor.execute(query, (data['ticket_ID']))
+			cursor.close()
+
+			cancel_message = 'Successfully deleted'
+			return render_template("customer_home.html", cancel_message = cancel_message, customer_email = customer_email)
+		else:
+			no_cancel_error = 'Could not cancel the flight'
+			return render_template('customer_home.html', no_cancel_error = no_cancel_error, customer_email = customer_email)
+	else:
+		return render_template('index.html')
+
 
 #################################################################################################################
 
