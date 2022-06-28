@@ -11,8 +11,8 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-					   port = 3306,
-                       password='',
+					   port = 8889,
+                       password='root',
                        db='system',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -428,10 +428,11 @@ def cancel_trip():
 		if(data):
 			query = 'DELETE FROM Purchase WHERE ticket_ID = %s'
 			cursor.execute(query, (data['ticket_ID']))
+			conn.commit()
 			query = 'DELETE FROM Ticket WHERE ticket_ID = %s'
 			cursor.execute(query, (data['ticket_ID']))
+			conn.commit()
 			cursor.close()
-
 			cancel_message = 'Successfully deleted'
 			return render_template("customer_home.html", cancel_message = cancel_message, customer_email = customer_email)
 		else:

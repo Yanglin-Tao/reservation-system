@@ -37,6 +37,7 @@
         <th>Departure airport</th>
         <th>Arrival date</th>
         <th>Arrival airport</th>
+        <th>Price</th>
         {% for line in search_flights %}
         <tr>
             <td>{{line['flight_number']}}</td>
@@ -44,6 +45,7 @@
             <td>{{line['departure_airport']}}</td>
             <td>{{line['arrival_date']}}</td>
             <td>{{line['arrival_airport']}}</td>
+            <td>{{line['base_price']}}</td>
         </tr>
         {% endfor %}
     </table>
@@ -52,16 +54,20 @@
         Arrival airport：<input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> <br>
         Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
         Arrival date: <input type="date" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
-        <input type="submit" value = "Search for flights" /> &nbsp;
+        <input type="submit" value = "Search for flights" /> <br>
         {% if no_search_error %}
         <p class="error"><strong>Error:</strong> {{error}}</p>
         {% endif %}
+        Card type: <input type="text" name = "card_type" placeholder="Card type: debit/credit"/> &nbsp;
+        Card number: <input type="number" name = "card_number" placeholder="Card number"/> <br>
+        Name on card: <input type="text" name = "name_on_card" placeholder="Name on card"/> &nbsp;
+        Expiration date: <input type="date" name = "expiration_date" placeholder="Expiration date"/> <br>
         <input type="submit" value = "Purchase tickets" /> &nbsp;
         {% if no_purchase_error %}
         <p class="error"><strong>Error:</strong> {{error}}</p>
         {% endif %}
         {% if purchase_message %}
-        <p class="purchase_message">{{purchase_message}}</p>
+        <p class="message">{{purchase_message}}</p>
         {% endif %}
     </form>
     
@@ -72,10 +78,10 @@
         Arrival date: <input type="date" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
         <input type="submit" value = "Cancel my trip" />
         {% if no_cancel_error %}
-        <p class="no_cancel_error"><strong>Error:</strong> {{no_cancel_error}}</p>
+        <p class="error"><strong>Error:</strong> {{no_cancel_error}}</p>
         {% endif %}
         {% if cancel_message %}
-        <p class="cancel_message">{{cancel_message}}</p>
+        <p class="message">{{cancel_message}}</p>
         {% endif %}
     </form>
     
