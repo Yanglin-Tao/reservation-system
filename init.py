@@ -1,6 +1,6 @@
 #Import Flask Library
-from email import message
-import email
+import hashlib
+from hashlib import md5
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 import datetime
@@ -105,6 +105,7 @@ def staff_register():
 def customer_login_auth():
 	#grabs information from the forms
 	email = request.form['customer_email']
+	# password = hashlib.md5((request.form['customer_password']).encode())
 	password = request.form['customer_password']
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -133,6 +134,7 @@ def customer_login_auth():
 def staff_login_auth():
 	if request.method == 'POST':
 		user_name = request.form['user_name']
+		# staff_password = hashlib.md5((request.form['staff_password']).encode())
 		staff_password = request.form['staff_password']
 		#cursor used to send queries
 		cursor = conn.cursor()
@@ -163,6 +165,7 @@ def staff_login_auth():
 def customer_register_auth():
 	customer_name = request.form['customer_name']
 	customer_email = request.form['customer_email']
+	# customer_password = hashlib.md5((request.form['customer_password']).encode())
 	customer_password = request.form['customer_password']
 	building_number = request.form['building_number']
 	street = request.form['street']
@@ -201,6 +204,7 @@ def customer_register_auth():
 @app.route('/staff_register_auth', methods=['GET', 'POST'])
 def staff_register_auth():
 	user_name = request.form['user_name']
+	# staff_password = hashlib.md5((request.form['staff_password']).encode())
 	staff_password = request.form['staff_password']
 	first_name = request.form['first_name']
 	last_name = request.form['last_name']
@@ -364,7 +368,7 @@ def customer_search_flights():
 			no_search_error = 'Could not find the flight'
 			return render_template('customer_home.html', no_search_error = no_search_error, customer_email = customer_email)
 	else:
-		return render_template('index.html')
+		return render_template('customer_home.html', customer_email = customer_email)
 
 #TODO: Customer purchases a ticket (from result of searching flight)
 #Author: Tianzuo Liu
@@ -372,40 +376,45 @@ def customer_search_flights():
 def purchase_ticket():
 	cursor = conn.cursor()
 	if request.method == 'POST':
-		data = customer_search_flights()
 		flight_number = request.form['flight_number']
+		dept_date = request.form['departure_date']
+		dept_time = request.form['departure_time']
+		airline_name = request.form['airline_name']
 		card_type = request.form['card_type']
 		card_number = request.form['card_number']
 		expiration_date = request.form['expiration_date']
 		name_on_card = request.form['name_on_card']
-		sold_price = request.form['sold_price']
-		airline_name = request.form['airline_name']
-		
 		customer_email = session['customer_email']
-
-		query = 'SELECT * FROM data WHERE flight_number = %s'
-		cursor.execute(query, (flight_number))
+		# check if the flight to purchase exists
+		query = 'SELECT * FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+		cursor.execute(query, (flight_number, dept_date, dept_time, airline_name))
 	
 		new_data = cursor.fetchone()
 		ticket_ID = str(random.randint(0,9999999))
 
 		if (new_data):
-			insertion = 'INSERT INTO Ticket VALUES (%s, %s, %s, %s, %s, %s, %s, CURDATE(), CURDATE(), %s, %s, %s, %s)'
+			query = 'SELECT base_price FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+			cursor.execute(query, (flight_number, dept_date, dept_time, airline_name))
+			data = cursor.fetchone()
+			# TODO: The sold price may be different from the base price. Handle the price increase mechanism.
+			sold_price = data['base_price']
+			# TODO: Should return error message if the tickets of the flight is fully booked.
+			# TODO: Should return error message if the card expiration date has passed.
+			insertion = 'INSERT INTO Ticket VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_DATE(), CURRENT_DATE(), %s, %s, %s, %s)'
 			cursor.execute(insertion, (ticket_ID, customer_email, sold_price, card_type, card_number, \
-				name_on_card, expiration_date, new_data['departure_date'], new_data['departure_time'],flight_number, airline_name))
+				name_on_card, expiration_date, dept_date, dept_time,flight_number, airline_name))
 			conn.commit()
-
 			purchase = 'INSERT INTO Purchase VALUES(%s, %s)'
 			cursor.execute(purchase, (customer_email, ticket_ID))
 			conn.commit()
 			cursor.close()
-			purchase_message = 'Successfully'
+			purchase_message = 'Successfully purchased ticket'
 			return render_template('customer_home.html', purchase_message = purchase_message, customer_email = customer_email)
 		else:
-			no_purchase_error = 'something wrong. Please try again'
+			no_purchase_error = 'Something wrong. Please try again'
 			return render_template('customer_home.html', no_purchase_error = no_purchase_error, customer_email = customer_email)
 	else:
-		return render_template('index.html')
+		return render_template('customer_home.html', customer_email = customer_email)
 
 #TODO: Customer cancels a trip
 #Author: Tianzuo Liu

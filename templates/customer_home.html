@@ -32,18 +32,24 @@
         {% endif %}
     </form>
     <table>
+        <th>Airline name</th>
         <th>Flight number</th>
         <th>Departure date</th>
+        <th>Departure time</th>
         <th>Departure airport</th>
         <th>Arrival date</th>
+        <th>Arrival time</th>
         <th>Arrival airport</th>
         <th>Price</th>
         {% for line in search_flights %}
         <tr>
+            <td>{{line['airline_name']}}</td>
             <td>{{line['flight_number']}}</td>
             <td>{{line['departure_date']}}</td>
+            <td>{{line['departure_time']}}</td>
             <td>{{line['departure_airport']}}</td>
             <td>{{line['arrival_date']}}</td>
+            <td>{{line['arrival_time']}}</td>
             <td>{{line['arrival_airport']}}</td>
             <td>{{line['base_price']}}</td>
         </tr>
@@ -58,6 +64,13 @@
         {% if no_search_error %}
         <p class="error"><strong>Error:</strong> {{error}}</p>
         {% endif %}
+    </form>
+
+    <form class = action action="/purchase_ticket" method="POST">
+        Flight number: <input type="number" name = "flight_number" placeholder="Flight number"/> &nbsp;
+        Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD"/> <br>
+        Departure time: <input type="time" name = "departure_time" placeholder="Departure time"/> &nbsp;
+        Airline name: <input type="text" name = "airline_name" placeholder="Airline name"/> <br>
         Card type: <input type="text" name = "card_type" placeholder="Card type: debit/credit"/> &nbsp;
         Card number: <input type="number" name = "card_number" placeholder="Card number"/> <br>
         Name on card: <input type="text" name = "name_on_card" placeholder="Name on card"/> &nbsp;
