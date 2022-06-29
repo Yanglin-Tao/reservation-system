@@ -336,7 +336,7 @@ def customer_view_flights():
 
 #TODO: Customer searches for flights
 #Author: Tianzuo Liu
-#test: pass for round trip
+#test: pass for one way
 '''
 Search for future flights (one way or round trip) based on source city/airport name, 
 destination city/airport name, dates (departure or return).
@@ -374,6 +374,7 @@ def customer_search_flights():
 
 #TODO: Customer purchases a ticket (from result of searching flight)
 #Author: Tianzuo Liu
+#test: pass for one way
 @app.route('/purchase_ticket', methods=['GET', 'POST'])
 def purchase_ticket():
 	cursor = conn.cursor()
@@ -392,17 +393,36 @@ def purchase_ticket():
 		cursor.execute(query, (flight_number, dept_date, dept_time, airline_name))
 	
 		new_data = cursor.fetchone()
-		ticket_ID = str(random.randint(0,9999999))
+		ticket_ID = str(random.randint(100000,200000))
 
 		if (new_data):
 			query = 'SELECT base_price FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
 			cursor.execute(query, (flight_number, dept_date, dept_time, airline_name))
 			data = cursor.fetchone()
 			# TODO: The sold price may be different from the base price. Handle the price increase mechanism.
+
+			query = 'SELECT COUNT(ticket_ID) FROM Ticket NATURAL JOIN Airplane NATURAL JOIN Flight WHERE flight_number = %s'
+			cursor.execute(query, (flight_number))
+			count_num = cursor.fetchone()
+			query = 'SELECT number_seats FROM Flight NATURAL JOIN Airplane WHERE flight_number = %s'
+			cursor.execute(query, (flight_number))
+			num_seats = cursor.fetchone()
 			sold_price = data['base_price']
-			# TODO: Should return error message if the tickets of the flight is fully booked.
+
 			# TODO: Should return error message if the card expiration date has passed.
+			if(datetime.datetime.now() > datetime.datetime.strptime(expiration_date, "%Y-%m-%d")):
+				card_exp_error = 'Sorry, the card expiration date has passed!'
+				return render_template('customer_home.html', card_exp_error = card_exp_error, customer_email = customer_email)
+			# TODO: Should return error message if the tickets of the flight is fully booked.
+			if(count_num['COUNT(ticket_ID)'] == (int(num_seats['number_seats']))):
+				no_ticket_error = 'Sorry, there is no ticket!'
+				return render_template('customer_home.html', no_ticket_error = no_ticket_error, customer_email = customer_email)
+			elif(count_num['COUNT(ticket_ID)'] >= (int(num_seats['number_seats']) * 0.6)):
+				sold_price = float(data['base_price'])
+				sold_price *= 1.2
+
 			insertion = 'INSERT INTO Ticket VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_DATE(), CURRENT_DATE(), %s, %s, %s, %s)'
+
 			cursor.execute(insertion, (ticket_ID, customer_email, sold_price, card_type, card_number, \
 				name_on_card, expiration_date, dept_date, dept_time,flight_number, airline_name))
 			conn.commit()
@@ -420,7 +440,7 @@ def purchase_ticket():
 
 #TODO: Customer cancels a trip
 #Author: Tianzuo Liu
-#test: pass for round trip
+#test: pass for one way
 @app.route('/cancel_trip', methods=['GET', 'POST'])
 def cancel_trip():
 	cursor = conn.cursor()
