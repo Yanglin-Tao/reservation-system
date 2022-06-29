@@ -30,11 +30,18 @@
     {% endfor %}
 </table>
 <form class = action action="/staff_view_flights" method="POST">
+    <p class = 'center'>Search by Departure/Arrival Airport</p>
     Departure airport: <input type="text" name = "departure_airport" placeholder="Departure airport"/> &nbsp;
     Arrival airport: <input type="text" name = "arrival_airport" placeholder="Arrival airport"/> <br>
+    <p class = 'center'>Search by Departure/Arrival City</p>
+    Departure city: <input type="text" name = "departure_city" placeholder="Departure city"/> &nbsp;
+    Arrival city: <input type="text" name = "arrival_city" placeholder="Arrival city"/> <br>
     From: <input type="date" name = "start_date" placeholder="From: YYYY-MM-DD"/> &nbsp;
     To: <input type="date" name = "end_date" placeholder="To: YYYY-MM-DD"/> <br>
     <input type="submit" value = "View flights" />
+    {% if mismatchError %}
+        <p class="error"><strong>Error:</strong> {{mismatchError}}</p>
+    {% endif %}
 </form>
 
 <form class = action action="/add_flight" method="POST">
@@ -42,9 +49,9 @@
     Departure airport: <input type="text" name = "departure_airport" placeholder="Departure airport" required/> <br>
     Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
     Departure time: <input type="time" name = "departure_time" placeholder="Departure time: hh:mm:ss" required/> <br>
+    Arrival date: <input type="date" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> &nbsp;
+    Arrival time: <input type="time" name = "arrival_time" placeholder="Arrival time: hh:mm:ss" required/> <br>
     Arrival airport: <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/> &nbsp;
-    Arrival date: <input type="date" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/> <br>
-    Arrival time: <input type="time" name = "arrival_time" placeholder="Arrival time: hh:mm:ss" required/> &nbsp;
     Airplane identification number: <input type="number" name = "airplane_identification_number" placeholder="Airplane identification number" required/>
     <br>
     Base price: <input type="number" name = "base_price" placeholder="Base price" required/> <br>

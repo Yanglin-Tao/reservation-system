@@ -49,9 +49,13 @@
     {% endfor %}
 </table>
 <form class = action action="/general_show_flights" method="POST">
-    Departure airport: <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
-    Arrival airport: <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/></br>
-    Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
+    <p class = 'center'>Search by Departure/Arrival Airport</p>
+    Departure airport: <input type="text" name = "departure_airport" placeholder="Departure airport"/> &nbsp;
+    Arrival airport: <input type="text" name = "arrival_airport" placeholder="Arrival airport" /></br>
+    <p class = 'center'>Search by Departure/Arrival City</p>
+    Departure city: <input type="text" name = "departure_city" placeholder="Departure city"/> &nbsp;
+    Arrival city: <input type="text" name = "arrival_city" placeholder="Arrival city"/></br>
+    Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD"/> &nbsp;
     Return date (for round trip): <input type="date" name = "return_date" placeholder="Return date: YYYY-MM-DD"/></br>
     <input type="submit" value = "Show all future flights" />
     {% if noReturnError %}

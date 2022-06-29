@@ -10,17 +10,23 @@
         <h1 class=heading>Welcome, {{customer_email}}</h1>
     </form>
     <table>
+        <th>Airline</th>
         <th>Flight number</th>
         <th>Departure date</th>
+        <th>Departure time</th>
         <th>Departure airport</th>
         <th>Arrival date</th>
+        <th>Arrival time</th>
         <th>Arrival airport</th>
         {% for line in future_flights %}
         <tr>
+            <td>{{line['airline_name']}}</td>
             <td>{{line['flight_number']}}</td>
             <td>{{line['departure_date']}}</td>
+            <td>{{line['departure_time']}}</td>
             <td>{{line['departure_airport']}}</td>
             <td>{{line['arrival_date']}}</td>
+            <td>{{line['arrival_time']}}</td>
             <td>{{line['arrival_airport']}}</td>
         </tr>
         {% endfor %}
@@ -94,10 +100,10 @@
     </form>
 
     <form class=action action="/cancel_trip" method="POST">
-        Departure airport: <input type="text" name="departure_airport" placeholder="Departure airport" required /> &nbsp;
-        Arrival airport: <input type="text" name="arrival_airport" placeholder="Arrival airport" required /> <br>
-        Departure date: <input type="date" name="departure_date" placeholder="Departure date: YYYY-MM-DD" required /> &nbsp;
-        Arrival date: <input type="date" name="arrival_date" placeholder="Arrival date: YYYY-MM-DD" required /> <br>
+        Flight number: <input type="number" name="flight_number" placeholder="Flight number"/> &nbsp;
+        Departure date: <input type="date" name="departure_date" placeholder="Departure date: YYYY-MM-DD"/> <br>
+        Departure time: <input type="time" name="departure_time" placeholder="Departure time"/> &nbsp;
+        Airline name: <input type="text" name="airline_name" placeholder="Airline name"/> <br>
         <input type="submit" value="Cancel my trip" />
         {% if no_cancel_error %}
         <p class="error"><strong>Error:</strong> {{no_cancel_error}}</p>

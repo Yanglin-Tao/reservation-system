@@ -33,15 +33,18 @@ def general_show_flights():
 	if request.method == 'POST':
 		dept_airport = request.form['departure_airport']
 		arri_airport = request.form['arrival_airport']
+		dept_city = request.form['departure_city']
+		arri_city = request.form['arrival_city']
 		dept_date = request.form['departure_date']
 		return_date = request.form['return_date']
-		if dept_airport != "" and arri_airport != "" and dept_date != "" and return_date == "":
+		if dept_airport != "" and arri_airport != "" and dept_date != "" and return_date == "" and dept_city == "" and arri_city == "":
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
 			go_flights = cursor.fetchall()	
 			cursor.close()
 			return render_template('index.html', go_flights = go_flights)
-		elif dept_airport != "" and arri_airport != "" and dept_date != "" and return_date != "":
+		elif dept_airport != "" and arri_airport != "" and dept_date != "" and return_date != "" and dept_city == "" and arri_city == "":
+			# check if there is a return trip
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (return_date, arri_airport, dept_airport, return_date))
 			return_flights = cursor.fetchall()
@@ -53,6 +56,24 @@ def general_show_flights():
 			else:
 				noReturnError = 'Sorry, no return trip found.'
 				return render_template('index.html', noReturnError = noReturnError)
+		elif dept_airport == "" and arri_airport == "" and dept_date != "" and return_date != "" and dept_city != "" and arri_city != "":
+			# check if there is a return trip
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
+			cursor.execute(query, (arri_city, dept_city, return_date, return_date))
+			return_flights = cursor.fetchall()
+			if (return_flights):
+				query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
+				cursor.execute(query, (dept_city, arri_city, dept_date, dept_date))
+				go_flights = cursor.fetchall()
+				return render_template('index.html', return_flights = return_flights, go_flights = go_flights)
+			else:
+				noReturnError = 'Sorry, no return trip found.'
+				return render_template('index.html', noReturnError = noReturnError)
+		elif dept_airport == "" and arri_airport == "" and dept_date != "" and return_date == "" and dept_city != "" and arri_city != "":
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
+			cursor.execute(query, (dept_city, arri_city, dept_date, dept_date))
+			go_flights = cursor.fetchall()
+			return render_template('index.html', go_flights = go_flights)
 		else:
 			invalidSearchError = 'Invalid data'
 			return render_template('index.html', invalidSearchError = invalidSearchError)
@@ -457,16 +478,14 @@ def purchase_ticket():
 def cancel_trip():
 	cursor = conn.cursor()
 	if request.method == 'POST':
-		departure_airport = request.form['departure_airport']
-		arrival_airport = request.form['arrival_airport']
-		departure_date = request.form['departure_date']
-		arrival_date = request.form['arrival_date']
+		flight_num = request.form['flight_number']
+		dept_date = request.form['departure_date']
+		dept_time = request.form['departure_time']
 		customer_email = session['customer_email']
-		query = 'SELECT ticket_ID FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_airport = %s and arrival_airport = %s and departure_date = %s and arrival_date = %s and departure_date >= CURDATE()'
-
-		cursor.execute(query, (session['customer_email'], departure_airport, arrival_airport, departure_date, arrival_date))
+		airline = request.form['airline_name']
+		query = 'SELECT ticket_ID FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and flight_number = %s and departure_date = %s and departure_time = %s and airline_name = %s and departure_date >= CURRENT_DATE()'
+		cursor.execute(query, (session['customer_email'], flight_num, dept_date, dept_time, airline))
 		data = cursor.fetchone()
-
 		if(data):
 			query = 'DELETE FROM Purchase WHERE ticket_ID = %s'
 			cursor.execute(query, (data['ticket_ID']))
@@ -475,7 +494,7 @@ def cancel_trip():
 			cursor.execute(query, (data['ticket_ID']))
 			conn.commit()
 			cursor.close()
-			cancel_message = 'Successfully deleted'
+			cancel_message = 'Successfully canceled the flight'
 			return render_template("customer_home.html", cancel_message = cancel_message, customer_email = customer_email)
 		else:
 			no_cancel_error = 'Could not cancel the flight'
@@ -552,6 +571,7 @@ def track_spending():
 	cursor = conn.cursor();
 	email = session['customer_email']
 	total_last_year = spending_last_year()
+	spending = monthly_spending_last_year()
 	if request.method == 'POST':
 		start = request.form['start_date']
 		end = request.form['end_date']
@@ -559,9 +579,9 @@ def track_spending():
 			query = 'SELECT %s AS start_date, %s AS end_date, SUM(sold_price) AS total FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= %s AND purchase_date <= %s'
 			cursor.execute(query, (start, end, email, start, end))
 			# stores purchase date, sold_price in a given date range
-			data = cursor.fetchall()
+			spending = cursor.fetchall()
 		cursor.close()
-		return render_template('customer_home.html', customer_email = email, spending = data, total_last_year = total_last_year)
+		return render_template('customer_home.html', customer_email = email, spending = spending, total_last_year = total_last_year)
 	else:
 		return render_template('customer_home.html', customer_email = email, total_last_year = total_last_year)
 
@@ -618,8 +638,8 @@ def default_view_30days():
 		customer_list = []
 		for j in range(len(customers)):
 			customer_list.append(customers[j]['customer_email'])
-		flights[i]['customer_email'] = customer_list
-
+		customer_email_str = ", ".join(customer_list)
+		flights[i]['customer_email'] = customer_email_str
 	cursor.close()
 	return flights
 
@@ -657,6 +677,8 @@ def staff_view_flights():
 		end = request.form['end_date']
 		dept_airport = request.form['departure_airport']
 		arri_airport = request.form['arrival_airport']
+		dept_city = request.form['departure_city']
+		arri_city = request.form['arrival_city']
 		# find which airline it is 
 		query = 'SELECT airline_name FROM Airline_staff WHERE user_name = %s'
 		cursor.execute(query, (user_name))
@@ -664,7 +686,7 @@ def staff_view_flights():
 		airline = data['airline_name']
 		# if there are inputs from user that specifies start_date, end_date, departure_airport, departure_city, 
 		# arrival_airport, and arrival_city
-		if start != "" and end != "" and dept_airport != "" and arri_airport != "":
+		if start != "" and end != "" and dept_airport != "" and arri_airport != "" and dept_city == "" and arri_city == "":
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date >= %s AND departure_date <= %s AND departure_airport = %s AND arrival_airport = %s AND airline_name = %s'
 			cursor.execute(query, (start, end, dept_airport, arri_airport, airline))
 			flights = cursor.fetchall()
@@ -678,9 +700,20 @@ def staff_view_flights():
 				customer_list = []
 				for j in range(len(customers)):
 					customer_list.append(customers[j]['customer_email'])
-				flights[i]['customer_email'] = customer_list
-		cursor.close()
-		return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
+				customer_email_str = ", ".join(customer_list)
+				flights[i]['customer_email'] = customer_email_str
+			cursor.close()
+			return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
+		elif start != "" and end != "" and dept_airport == "" and arri_airport == "" and dept_city != "" and arri_city != "":
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date >= %s AND departure_date <= %s AND airline_name = %s'
+			cursor.execute(query, (dept_city, arri_city, start, end, airline))
+			flights = cursor.fetchall()
+			cursor.close()
+			return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
+		else:
+			mismatchError = 'Please enter only departure/arrival city or departure/arrival airport.'
+			return render_template('staff_home.html', user_name = user_name, mismatchError = mismatchError, airplanes = airplanes)
+
 	else:
 		return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
 
