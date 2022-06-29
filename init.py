@@ -35,13 +35,13 @@ def general_show_flights():
 		arri_airport = request.form['arrival_airport']
 		dept_date = request.form['departure_date']
 		return_date = request.form['return_date']
-		if dept_airport != None and arri_airport != None and dept_date != None and return_date == None:
+		if dept_airport != "" and arri_airport != "" and dept_date != "" and return_date == "":
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
 			go_flights = cursor.fetchall()	
 			cursor.close()
 			return render_template('index.html', go_flights = go_flights)
-		elif dept_airport != None and arri_airport != None and dept_date != None and return_date != None:
+		elif dept_airport != "" and arri_airport != "" and dept_date != "" and return_date != "":
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (return_date, arri_airport, dept_airport, return_date))
 			return_flights = cursor.fetchall()
@@ -70,7 +70,7 @@ def general_check_status():
 		flight_num = request.form['flight_number']
 		dept_date = request.form['departure_date']
 		arri_date = request.form['arrival_date']
-		if airline != None and flight_num != None and dept_date != None and arri_date != None:
+		if airline != "" and flight_num != "" and dept_date != "" and arri_date != "":
 			query = 'SELECT airline_name, flight_number, departure_date, arrival_date, flight_status FROM Flight WHERE airline_name = %s AND flight_number = %s AND departure_date = %s AND arrival_date = %s'
 			cursor.execute(query, (airline, flight_num, dept_date, arri_date))
 			data = cursor.fetchall()	
@@ -117,7 +117,7 @@ def staff_register():
 def customer_login_auth():
 	#grabs information from the forms
 	email = request.form['customer_email']
-	password = hashlib.md5((request.form['customer_password']).encode())
+	password = (hashlib.md5((request.form['customer_password']).encode())).hexdigest()
 	print(password)
 	# password = request.form['customer_password']
 	#cursor used to send queries
@@ -147,7 +147,7 @@ def customer_login_auth():
 def staff_login_auth():
 	if request.method == 'POST':
 		user_name = request.form['user_name']
-		staff_password = hashlib.md5((request.form['staff_password']).encode())
+		staff_password = (hashlib.md5((request.form['staff_password']).encode())).hexdigest()
 		# staff_password = request.form['staff_password']
 		#cursor used to send queries
 		cursor = conn.cursor()
@@ -178,7 +178,7 @@ def staff_login_auth():
 def customer_register_auth():
 	customer_name = request.form['customer_name']
 	customer_email = request.form['customer_email']
-	customer_password = hashlib.md5((request.form['customer_password']).encode())
+	customer_password = (hashlib.md5((request.form['customer_password']).encode())).hexdigest()
 	print(customer_password)
 	# customer_password = request.form['customer_password']
 	building_number = request.form['building_number']
@@ -218,7 +218,7 @@ def customer_register_auth():
 @app.route('/staff_register_auth', methods=['GET', 'POST'])
 def staff_register_auth():
 	user_name = request.form['user_name']
-	staff_password = hashlib.md5((request.form['staff_password']).encode())
+	staff_password = (hashlib.md5((request.form['staff_password']).encode())).hexdigest()
 	# staff_password = request.form['staff_password']
 	first_name = request.form['first_name']
 	last_name = request.form['last_name']
@@ -366,7 +366,7 @@ def customer_search_flights():
 		customer_email = session['customer_email']
 		
 		#executes query
-		if (arrival_date != None):
+		if (arrival_date != ""):
 			query = 'SELECT * From Flight WHERE departure_airport = %s and arrival_airport = %s and departure_date = %s and arrival_date = %s and departure_date >= CURDATE()'
 			cursor.execute(query, (departure_airport, arrival_airport, departure_date, arrival_date))
 		else:
@@ -461,7 +461,6 @@ def cancel_trip():
 		arrival_airport = request.form['arrival_airport']
 		departure_date = request.form['departure_date']
 		arrival_date = request.form['arrival_date']
-
 		customer_email = session['customer_email']
 		query = 'SELECT ticket_ID FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_airport = %s and arrival_airport = %s and departure_date = %s and arrival_date = %s and departure_date >= CURDATE()'
 
@@ -556,7 +555,7 @@ def track_spending():
 	if request.method == 'POST':
 		start = request.form['start_date']
 		end = request.form['end_date']
-		if start != None and end != None:
+		if start != "" and end != "":
 			query = 'SELECT %s AS start_date, %s AS end_date, SUM(sold_price) AS total FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= %s AND purchase_date <= %s'
 			cursor.execute(query, (start, end, email, start, end))
 			# stores purchase date, sold_price in a given date range
@@ -665,7 +664,7 @@ def staff_view_flights():
 		airline = data['airline_name']
 		# if there are inputs from user that specifies start_date, end_date, departure_airport, departure_city, 
 		# arrival_airport, and arrival_city
-		if start != None and end != None and dept_airport != None and arri_airport != None:
+		if start != "" and end != "" and dept_airport != "" and arri_airport != "":
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date >= %s AND departure_date <= %s AND departure_airport = %s AND arrival_airport = %s AND airline_name = %s'
 			cursor.execute(query, (start, end, dept_airport, arri_airport, airline))
 			flights = cursor.fetchall()

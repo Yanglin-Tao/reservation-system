@@ -9,13 +9,13 @@ insert into Airport values('LAX', 'Los Angeles', 'United States', 'both');
 insert into Airport values('PHL', 'Philadelphia', 'United States', 'both');
 
 /*insert Customer*/
-insert into Customer values('Yanglin Tao', 'yt2061@nyu.edu', 'p@ssword', 110, 'Livingston St', 'New York', 'NY', 3472003837, 'YT1234567', '2031-02-18', 'China Mainland', '2001-12-27');
+insert into Customer values('Yanglin Tao', 'yt2061@nyu.edu', '827ccb0eea8a706c4c34a16891f84e7b', 110, 'Livingston St', 'New York', 'NY', 3472003837, 'YT1234567', '2031-02-18', 'China Mainland', '2001-12-27');
 
-insert into Customer values('Tianzuo Liu', 'tl3119@nyu.edu', 'logmein123', 370, 'Jay St', 'New York', 'NY', 8632473460, 'TL7654321', '2031-01-01', 'China Mainland', '2002-01-01');
+insert into Customer values('Tianzuo Liu', 'tl3119@nyu.edu', '827ccb0eea8a706c4c34a16891f84e7b', 370, 'Jay St', 'New York', 'NY', 8632473460, 'TL7654321', '2031-01-01', 'China Mainland', '2002-01-01');
 
-insert into Customer values('Yuting Li', 'yl7685@nyu.edu', 'imjustin456', 370, 'Jay St', 'New York', 'NY', 8335482809, 'YL432561', '2031-06-13', 'China Mainland', '2002-01-01');
+insert into Customer values('Yuting Li', 'yl7685@nyu.edu', '827ccb0eea8a706c4c34a16891f84e7b', 370, 'Jay St', 'New York', 'NY', 8335482809, 'YL432561', '2031-06-13', 'China Mainland', '2002-01-01');
 
-INSERT INTO Customer VALUES ('Ratan Dey', 'ratandey@nyu.edu', '1234567', '370', 'Jay', 'New York', 'NY', '3472803636', 'RD1234567', '2031-02-20', 'India', '1970-01-01');
+INSERT INTO Customer VALUES ('Ratan Dey', 'ratandey@nyu.edu', '827ccb0eea8a706c4c34a16891f84e7b', '370', 'Jay', 'New York', 'NY', '3472803636', 'RD1234567', '2031-02-20', 'India', '1970-01-01');
 
 /*insert Airplane*/
 insert into Airplane values(777330, 368, 'Boeing', 10, 'Jet Blue');
