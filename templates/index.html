@@ -15,7 +15,28 @@
     <th>Arrival date</th>
     <th>Arrival time</th>
     <th>Arrival airport</th>
-    {% for line in flights %}
+    {% for line in go_flights %}
+        <tr>
+            <td>{{line['flight_number']}}</td>
+            <td>{{line['departure_date']}}</td>
+            <td>{{line['departure_time']}}</td>
+            <td>{{line['departure_airport']}}</td>
+            <td>{{line['arrival_date']}}</td>
+            <td>{{line['arrival_time']}}</td>
+            <td>{{line['arrival_airport']}}</td>
+        </tr>
+    {% endfor %}
+</table>
+<br>
+<table>
+    <th>Flight number</th>
+    <th>Departure date</th>
+    <th>Departure time</th>
+    <th>Departure airport</th>
+    <th>Arrival date</th>
+    <th>Arrival time</th>
+    <th>Arrival airport</th>
+    {% for line in return_flights %}
         <tr>
             <td>{{line['flight_number']}}</td>
             <td>{{line['departure_date']}}</td>
@@ -31,10 +52,13 @@
     Departure airport: <input type="text" name = "departure_airport" placeholder="Departure airport" required/> &nbsp;
     Arrival airport: <input type="text" name = "arrival_airport" placeholder="Arrival airport" required/></br>
     Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
-    Arrival date: <input type="date" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/></br>
+    Return date (for round trip): <input type="date" name = "return_date" placeholder="Return date: YYYY-MM-DD"/></br>
     <input type="submit" value = "Show all future flights" />
-    {% if error %}
-		<p class="error"><strong>Error:</strong> {{error}}</p>
+    {% if noReturnError %}
+        <p class="error"><strong>Error:</strong> {{noReturnError}}</p>
+	{% endif %}
+    {% if invalidSearchError %}
+        <p class="error"><strong>Error:</strong> {{invalidSearchError}}</p>
 	{% endif %}
 </form>
 <table>

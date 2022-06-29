@@ -34,16 +34,28 @@ def general_show_flights():
 		dept_airport = request.form['departure_airport']
 		arri_airport = request.form['arrival_airport']
 		dept_date = request.form['departure_date']
-		arri_date = request.form['arrival_date']
-		if dept_airport != None and arri_airport != None and dept_date != None and arri_date != None:
-			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_date = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
-			cursor.execute(query, (dept_date, dept_airport, arri_date, arri_airport, dept_date))
-			data = cursor.fetchall()	
+		return_date = request.form['return_date']
+		if dept_airport != None and arri_airport != None and dept_date != None and return_date == None:
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
+			cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
+			go_flights = cursor.fetchall()	
 			cursor.close()
-			return render_template('index.html', flights = data)
+			return render_template('index.html', go_flights = go_flights)
+		elif dept_airport != None and arri_airport != None and dept_date != None and return_date != None:
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
+			cursor.execute(query, (return_date, arri_airport, dept_airport, return_date))
+			return_flights = cursor.fetchall()
+			if (return_flights):
+				query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
+				cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
+				go_flights = cursor.fetchall()	
+				return render_template('index.html', return_flights = return_flights, go_flights = go_flights)
+			else:
+				noReturnError = 'Sorry, no return trip found.'
+				return render_template('index.html', noReturnError = noReturnError)
 		else:
-			error = 'Invalid data'
-			return render_template('index.html', error=error)
+			invalidSearchError = 'Invalid data'
+			return render_template('index.html', invalidSearchError = invalidSearchError)
 	else:
 		return render_template('index.html')
 
