@@ -26,17 +26,17 @@ insert into Airplane values(787999, 276, 'Boeing', 4, 'Jet Blue');
 insert into Airplane values(787555, 276, 'Boeing', 4, 'Jet Blue');
 
 /*insert Airline_Staff*/
-insert into Airline_Staff values('worker01',  '12345', 'Jack', 'Green',  '1990-12-03', 'Jet Blue');
+insert into Airline_Staff values('worker01',  '827ccb0eea8a706c4c34a16891f84e7b', 'Jack', 'Green',  '1990-12-03', 'Jet Blue');
 insert into staff_phone values('worker01', 3203645377);
 insert into staff_email values('worker01', 'jackgreen@gmail.com');
 insert into staff_email values('worker01', 'jackgreen@jetblue.com');
 
-insert into Airline_Staff values('worker02',  '67890', 'Jane', 'Doe',  '1992-05-03', 'United Airlines');
+insert into Airline_Staff values('worker02',  '827ccb0eea8a706c4c34a16891f84e7b', 'Jane', 'Doe',  '1992-05-03', 'United Airlines');
 insert into staff_phone values('worker02',5169902432);
 insert into staff_email values('worker02', 'janedoe@gmail.com');
 insert into staff_email values('worker02', 'janedoe@united.com');
 
-INSERT INTO Airline_Staff VALUES ('worker03', '12345', 'James', 'Wayne', '1991-12-02', 'Jet Blue');
+INSERT INTO Airline_Staff VALUES ('worker03', '827ccb0eea8a706c4c34a16891f84e7b', 'James', 'Wayne', '1991-12-02', 'Jet Blue');
 INSERT INTO staff_phone VALUES ('worker03', 3472883737);
 INSERT INTO staff_email VALUES ('worker03', 'jameswayne@gmail.com');
 INSERT INTO staff_email VALUES ('worker03', 'jameswayne@jetblue.com');
