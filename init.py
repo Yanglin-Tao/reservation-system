@@ -105,8 +105,9 @@ def staff_register():
 def customer_login_auth():
 	#grabs information from the forms
 	email = request.form['customer_email']
-	# password = hashlib.md5((request.form['customer_password']).encode())
-	password = request.form['customer_password']
+	password = hashlib.md5((request.form['customer_password']).encode())
+	print(password)
+	# password = request.form['customer_password']
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
@@ -134,8 +135,8 @@ def customer_login_auth():
 def staff_login_auth():
 	if request.method == 'POST':
 		user_name = request.form['user_name']
-		# staff_password = hashlib.md5((request.form['staff_password']).encode())
-		staff_password = request.form['staff_password']
+		staff_password = hashlib.md5((request.form['staff_password']).encode())
+		# staff_password = request.form['staff_password']
 		#cursor used to send queries
 		cursor = conn.cursor()
 		#executes query
@@ -165,8 +166,9 @@ def staff_login_auth():
 def customer_register_auth():
 	customer_name = request.form['customer_name']
 	customer_email = request.form['customer_email']
-	# customer_password = hashlib.md5((request.form['customer_password']).encode())
-	customer_password = request.form['customer_password']
+	customer_password = hashlib.md5((request.form['customer_password']).encode())
+	print(customer_password)
+	# customer_password = request.form['customer_password']
 	building_number = request.form['building_number']
 	street = request.form['street']
 	city = request.form['city']
@@ -204,8 +206,8 @@ def customer_register_auth():
 @app.route('/staff_register_auth', methods=['GET', 'POST'])
 def staff_register_auth():
 	user_name = request.form['user_name']
-	# staff_password = hashlib.md5((request.form['staff_password']).encode())
-	staff_password = request.form['staff_password']
+	staff_password = hashlib.md5((request.form['staff_password']).encode())
+	# staff_password = request.form['staff_password']
 	first_name = request.form['first_name']
 	last_name = request.form['last_name']
 	date_of_birth = request.form['date_of_birth']
