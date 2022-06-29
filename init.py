@@ -1,6 +1,6 @@
 #Import Flask Library
-from email import message
-import email
+import hashlib
+from hashlib import md5
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 import datetime
@@ -11,8 +11,8 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-					   port = 3306,
-                       password='',
+					   port = 8889,
+                       password='root',
                        db='system',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -105,7 +105,9 @@ def staff_register():
 def customer_login_auth():
 	#grabs information from the forms
 	email = request.form['customer_email']
-	password = request.form['customer_password']
+	password = hashlib.md5((request.form['customer_password']).encode())
+	print(password)
+	# password = request.form['customer_password']
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
@@ -133,7 +135,8 @@ def customer_login_auth():
 def staff_login_auth():
 	if request.method == 'POST':
 		user_name = request.form['user_name']
-		staff_password = request.form['staff_password']
+		staff_password = hashlib.md5((request.form['staff_password']).encode())
+		# staff_password = request.form['staff_password']
 		#cursor used to send queries
 		cursor = conn.cursor()
 		#executes query
@@ -163,7 +166,9 @@ def staff_login_auth():
 def customer_register_auth():
 	customer_name = request.form['customer_name']
 	customer_email = request.form['customer_email']
-	customer_password = request.form['customer_password']
+	customer_password = hashlib.md5((request.form['customer_password']).encode())
+	print(customer_password)
+	# customer_password = request.form['customer_password']
 	building_number = request.form['building_number']
 	street = request.form['street']
 	city = request.form['city']
@@ -201,7 +206,8 @@ def customer_register_auth():
 @app.route('/staff_register_auth', methods=['GET', 'POST'])
 def staff_register_auth():
 	user_name = request.form['user_name']
-	staff_password = request.form['staff_password']
+	staff_password = hashlib.md5((request.form['staff_password']).encode())
+	# staff_password = request.form['staff_password']
 	first_name = request.form['first_name']
 	last_name = request.form['last_name']
 	date_of_birth = request.form['date_of_birth']
@@ -364,7 +370,7 @@ def customer_search_flights():
 			no_search_error = 'Could not find the flight'
 			return render_template('customer_home.html', no_search_error = no_search_error, customer_email = customer_email)
 	else:
-		return render_template('index.html')
+		return render_template('customer_home.html', customer_email = customer_email)
 
 #TODO: Customer purchases a ticket (from result of searching flight)
 #Author: Tianzuo Liu
@@ -394,6 +400,7 @@ def purchase_ticket():
 			cursor.execute(query, (flight_number, dept_date, dept_time, airline_name))
 			data = cursor.fetchone()
 			# TODO: The sold price may be different from the base price. Handle the price increase mechanism.
+
 			query = 'SELECT COUNT(ticket_ID) FROM Ticket NATURAL JOIN Airplane NATURAL JOIN Flight WHERE flight_number = %s'
 			cursor.execute(query, (flight_number))
 			count_num = cursor.fetchone()
@@ -414,7 +421,8 @@ def purchase_ticket():
 				sold_price = float(data['base_price'])
 				sold_price *= 1.2
 
-			insertion = 'INSERT INTO Ticket VALUES (%s, %s, %s, %s, %s, %s, %s, CURTIME(), CURTIME(), %s, %s, %s, %s)'
+			insertion = 'INSERT INTO Ticket VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_DATE(), CURRENT_DATE(), %s, %s, %s, %s)'
+
 			cursor.execute(insertion, (ticket_ID, customer_email, sold_price, card_type, card_number, \
 				name_on_card, expiration_date, dept_date, dept_time,flight_number, airline_name))
 			conn.commit()
@@ -456,7 +464,6 @@ def cancel_trip():
 			cursor.execute(query, (data['ticket_ID']))
 			conn.commit()
 			cursor.close()
-
 			cancel_message = 'Successfully deleted'
 			return render_template("customer_home.html", cancel_message = cancel_message, customer_email = customer_email)
 		else:

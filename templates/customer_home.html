@@ -55,17 +55,19 @@
         </tr>
         {% endfor %}
     </table>
+
     <form class=action action="/customer_search_flights" method="POST">
         Departure airport：<input type="text" name="departure_airport" placeholder="Departure airport" required /> &nbsp;
         Arrival airport：<input type="text" name="arrival_airport" placeholder="Arrival airport" required /> <br>
         Departure date: <input type="date" name="departure_date" placeholder="Departure date: YYYY-MM-DD" required /> &nbsp;
         Arrival date: <input type="date" name="arrival_date" placeholder="Arrival date: YYYY-MM-DD" required /> <br>
         <input type="submit" value="Search for flights" /> <br>
+
         {% if no_search_error %}
         <p class="error"><strong>Error:</strong> {{no_search_error}}</p>
         {% endif %}
     </form>
-
+    
     <form class=action action="/purchase_ticket" method="POST">
         Flight number: <input type="number" name="flight_number" placeholder="Flight number" /> &nbsp;
         Departure date: <input type="date" name="departure_date" placeholder="Departure date: YYYY-MM-DD" /> <br>
@@ -76,6 +78,7 @@
         Name on card: <input type="text" name="name_on_card" placeholder="Name on card" /> &nbsp;
         Expiration date: <input type="date" name="expiration_date" placeholder="Expiration date" /> <br>
         <input type="submit" value="Purchase tickets" /> &nbsp;
+
         {% if no_purchase_error %}
         <p class="error"><strong>Error:</strong> {{no_purchase_error}}</p>
         {% endif %}
