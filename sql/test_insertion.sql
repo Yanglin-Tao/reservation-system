@@ -9,13 +9,13 @@ insert into Airport values('LAX', 'Los Angeles', 'United States', 'both');
 insert into Airport values('PHL', 'Philadelphia', 'United States', 'both');
 
 /*insert Customer*/
-insert into Customer values('Yanglin Tao', 'yt2061@nyu.edu', 'p@ssword', 110, 'Livingston St', 'New York', 'NY', 3472003837, 'YT1234567', '2031-02-18', 'China Mainland', '2001-12-27');
+insert into Customer values('Yanglin Tao', 'yt2061@nyu.edu', '827ccb0eea8a706c4c34a16891f84e7b', 110, 'Livingston St', 'New York', 'NY', 3472003837, 'YT1234567', '2031-02-18', 'China Mainland', '2001-12-27');
 
-insert into Customer values('Tianzuo Liu', 'tl3119@nyu.edu', 'logmein123', 370, 'Jay St', 'New York', 'NY', 8632473460, 'TL7654321', '2031-01-01', 'China Mainland', '2002-01-01');
+insert into Customer values('Tianzuo Liu', 'tl3119@nyu.edu', '827ccb0eea8a706c4c34a16891f84e7b', 370, 'Jay St', 'New York', 'NY', 8632473460, 'TL7654321', '2031-01-01', 'China Mainland', '2002-01-01');
 
-insert into Customer values('Yuting Li', 'yl7685@nyu.edu', 'imjustin456', 370, 'Jay St', 'New York', 'NY', 8335482809, 'YL432561', '2031-06-13', 'China Mainland', '2002-01-01');
+insert into Customer values('Yuting Li', 'yl7685@nyu.edu', '827ccb0eea8a706c4c34a16891f84e7b', 370, 'Jay St', 'New York', 'NY', 8335482809, 'YL432561', '2031-06-13', 'China Mainland', '2002-01-01');
 
-INSERT INTO Customer VALUES ('Ratan Dey', 'ratandey@nyu.edu', '1234567', '370', 'Jay', 'New York', 'NY', '3472803636', 'RD1234567', '2031-02-20', 'India', '1970-01-01');
+INSERT INTO Customer VALUES ('Ratan Dey', 'ratandey@nyu.edu', '827ccb0eea8a706c4c34a16891f84e7b', '370', 'Jay', 'New York', 'NY', '3472803636', 'RD1234567', '2031-02-20', 'India', '1970-01-01');
 
 /*insert Airplane*/
 insert into Airplane values(777330, 368, 'Boeing', 10, 'Jet Blue');
@@ -26,17 +26,17 @@ insert into Airplane values(787999, 276, 'Boeing', 4, 'Jet Blue');
 insert into Airplane values(787555, 276, 'Boeing', 4, 'Jet Blue');
 
 /*insert Airline_Staff*/
-insert into Airline_Staff values('worker01',  '12345', 'Jack', 'Green',  '1990-12-03', 'Jet Blue');
+insert into Airline_Staff values('worker01',  '827ccb0eea8a706c4c34a16891f84e7b', 'Jack', 'Green',  '1990-12-03', 'Jet Blue');
 insert into staff_phone values('worker01', 3203645377);
 insert into staff_email values('worker01', 'jackgreen@gmail.com');
 insert into staff_email values('worker01', 'jackgreen@jetblue.com');
 
-insert into Airline_Staff values('worker02',  '67890', 'Jane', 'Doe',  '1992-05-03', 'United Airlines');
+insert into Airline_Staff values('worker02',  '827ccb0eea8a706c4c34a16891f84e7b', 'Jane', 'Doe',  '1992-05-03', 'United Airlines');
 insert into staff_phone values('worker02',5169902432);
 insert into staff_email values('worker02', 'janedoe@gmail.com');
 insert into staff_email values('worker02', 'janedoe@united.com');
 
-INSERT INTO Airline_Staff VALUES ('worker03', '12345', 'James', 'Wayne', '1991-12-02', 'Jet Blue');
+INSERT INTO Airline_Staff VALUES ('worker03', '827ccb0eea8a706c4c34a16891f84e7b', 'James', 'Wayne', '1991-12-02', 'Jet Blue');
 INSERT INTO staff_phone VALUES ('worker03', 3472883737);
 INSERT INTO staff_email VALUES ('worker03', 'jameswayne@gmail.com');
 INSERT INTO staff_email VALUES ('worker03', 'jameswayne@jetblue.com');
@@ -82,4 +82,3 @@ insert into Purchase values('yt2061@nyu.edu', 195680);
 insert into Purchase values('yt2061@nyu.edu', 195690);
 insert into Purchase values('yt2061@nyu.edu', 195700);
 insert into Purchase values('yl7685@nyu.edu', 197750);
-
