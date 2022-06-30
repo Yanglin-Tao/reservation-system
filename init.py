@@ -973,10 +973,14 @@ def view_revenue():
 
 #TODO: Staff logout
 #Author: Justin Li
-@app.route('/staff_logout')
+@app.route('/staff_logout', methods=['GET', 'POST'])
 def staff_logout():
-    session.pop('staff_email')
-    return redirect('/')
+	if request.method == 'POST':
+		del session['user_name']
+		return render_template('staff_logout.html')
+	else:
+		return render_template('staff_home.html')
+
 
 app.secret_key = 'some key that you will never guess'
 
