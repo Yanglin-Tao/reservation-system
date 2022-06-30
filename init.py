@@ -147,7 +147,6 @@ def customer_login_auth():
 	#grabs information from the forms
 	email = request.form['customer_email']
 	password = (hashlib.md5((request.form['customer_password']).encode())).hexdigest()
-	print(password)
 	# password = request.form['customer_password']
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -208,7 +207,6 @@ def customer_register_auth():
 	customer_name = request.form['customer_name']
 	customer_email = request.form['customer_email']
 	customer_password = (hashlib.md5((request.form['customer_password']).encode())).hexdigest()
-	print(customer_password)
 	# customer_password = request.form['customer_password']
 	building_number = request.form['building_number']
 	street = request.form['street']
