@@ -42,7 +42,11 @@ def general_show_flights():
 			cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
 			go_flights = cursor.fetchall()	
 			cursor.close()
-			return render_template('index.html', go_flights = go_flights)
+			if(go_flights):
+				return render_template('index.html', go_flights = go_flights)
+			else:
+				noReturnError = 'Sorry, no trip found.'
+				return render_template('index.html', noReturnError = noReturnError)
 		elif dept_airport != "" and arri_airport != "" and dept_date != "" and return_date != "" and dept_city == "" and arri_city == "":
 			# check if there is a return trip
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
@@ -73,7 +77,11 @@ def general_show_flights():
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (dept_city, arri_city, dept_date, dept_date))
 			go_flights = cursor.fetchall()
-			return render_template('index.html', go_flights = go_flights)
+			if(go_flights):
+				return render_template('index.html', go_flights = go_flights)
+			else:
+				noReturnError = 'Sorry, no trip found.'
+				return render_template('index.html', noReturnError = noReturnError)
 		else:
 			invalidSearchError = 'Invalid data'
 			return render_template('index.html', invalidSearchError = invalidSearchError)
@@ -380,31 +388,63 @@ destination city/airport name, dates (departure or return).
 def customer_search_flights():
 	cursor = conn.cursor()
 	if request.method == 'POST':
-		departure_airport = request.form['departure_airport']
-		arrival_airport = request.form['arrival_airport']
-		departure_date = request.form['departure_date']
-		arrival_date = request.form['arrival_date']
+		dept_airport = request.form['departure_airport']
+		arri_airport = request.form['arrival_airport']
+		dept_date = request.form['departure_date']
+		return_date = request.form['return_date']
+		dept_city = request.form['departure_city']
+		arri_city = request.form['arrival_city']
 		customer_email = session['customer_email']
-		
-		#executes query
-		if (arrival_date != ""):
-			query = 'SELECT * From Flight WHERE departure_airport = %s and arrival_airport = %s and departure_date = %s and arrival_date = %s and departure_date >= CURDATE()'
-			cursor.execute(query, (departure_airport, arrival_airport, departure_date, arrival_date))
+		if dept_airport != "" and arri_airport != "" and dept_date != "" and return_date == "" and dept_city == "" and arri_city == "":
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight WHERE departure_date = %s AND airport_city = %s AND airport_city = %s AND %s > CURRENT_DATE()'
+			cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
+			go_flights = cursor.fetchall()	
+			if (go_flights):
+				return render_template('customer_home.html', go_flights = go_flights, customer_email = customer_email)
+			else:
+				noReturnError = 'Sorry, no trip found.'
+				return render_template('customer_home.html', noReturnError = noReturnError, customer_email = customer_email)
+		elif dept_airport != "" and arri_airport != "" and dept_date != "" and return_date != "" and dept_city == "" and arri_city == "":
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
+			cursor.execute(query, (return_date, arri_airport, dept_airport, return_date))
+			return_flights = cursor.fetchall()
+			if (return_flights):
+				query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
+				cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
+				go_flights = cursor.fetchall()	
+				return render_template('customer_home.html', return_flights = return_flights, go_flights = go_flights, customer_email = customer_email)
+			else:
+				noReturnError = 'Sorry, no return trip found.'
+				return render_template('customer_home.html', noReturnError = noReturnError, customer_email = customer_email)
+		elif dept_airport == "" and arri_airport == "" and dept_date != "" and return_date != "" and dept_city != "" and arri_city != "":
+			# check if there is a return trip
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
+			cursor.execute(query, (arri_city, dept_city, return_date, return_date))
+			return_flights = cursor.fetchall()
+			if (return_flights):
+				query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
+				cursor.execute(query, (dept_city, arri_city, dept_date, dept_date))
+				go_flights = cursor.fetchall()
+				return render_template('customer_home.html', return_flights = return_flights, go_flights = go_flights, customer_email = customer_email)
+			else:
+				noReturnError = 'Sorry, no return trip found.'
+				return render_template('customer_home.html', noReturnError = noReturnError, customer_email = customer_email)
+		elif dept_airport == "" and arri_airport == "" and dept_date != "" and return_date == "" and dept_city != "" and arri_city != "":
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
+			cursor.execute(query, (dept_city, arri_city, dept_date, dept_date))
+			go_flights = cursor.fetchall()
+			if(go_flights):
+				return render_template('customer_home.html', go_flights = go_flights, customer_email = customer_email)
+			else:
+				noReturnError = 'Sorry, no trip found.'
+				return render_template('customer_home.html', noReturnError = noReturnError, customer_email = customer_email)
 		else:
-			query = 'SELECT * From Flight WHERE departure_airport = %s and arrival_airport = %s and departure_date = %s and departure_date >= CURDATE()'
-			cursor.execute(query, (departure_airport, arrival_airport, departure_date))
-		#stores the results in a variable
-		search_flights = cursor.fetchall()
-		cursor.close()
-		
-		if(search_flights):
-			return render_template('customer_home.html', search_flights = search_flights, customer_email = customer_email)
-		else:
-			no_search_error = 'Could not find the flight'
-			return render_template('customer_home.html', no_search_error = no_search_error, customer_email = customer_email)
+			invalidSearchError = 'Invalid data'
+			return render_template('customer_home.html', invalidSearchError = invalidSearchError, customer_email = customer_email)
 	else:
 		return render_template('customer_home.html', customer_email = customer_email)
 
+	
 #TODO: Customer purchases a ticket (from result of searching flight)
 #Author: Tianzuo Liu
 #test: pass for one way
@@ -478,30 +518,45 @@ def purchase_ticket():
 def cancel_trip():
 	cursor = conn.cursor()
 	if request.method == 'POST':
-		flight_num = request.form['flight_number']
-		dept_date = request.form['departure_date']
-		dept_time = request.form['departure_time']
+		flight_number = request.form['flight_number']
+		departure_date = request.form['departure_date']
+		departure_time = request.form['departure_time']
+		airline_name = request.form['airline_name']
 		customer_email = session['customer_email']
-		airline = request.form['airline_name']
-		query = 'SELECT ticket_ID FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and flight_number = %s and departure_date = %s and departure_time = %s and airline_name = %s and departure_date >= CURRENT_DATE()'
-		cursor.execute(query, (session['customer_email'], flight_num, dept_date, dept_time, airline))
+		query = 'SELECT ticket_ID FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_date = %s and flight_number = %s and departure_time = %s and airline_name = %s and departure_date >= CURDATE()'
 		data = cursor.fetchone()
 		if(data):
-			query = 'DELETE FROM Purchase WHERE ticket_ID = %s'
-			cursor.execute(query, (data['ticket_ID']))
-			conn.commit()
-			query = 'DELETE FROM Ticket WHERE ticket_ID = %s'
-			cursor.execute(query, (data['ticket_ID']))
-			conn.commit()
-			cursor.close()
-			cancel_message = 'Successfully canceled the flight'
-			return render_template("customer_home.html", cancel_message = cancel_message, customer_email = customer_email)
+			query = 'SELECT * FROM Ticket WHERE ticket_ID = %s'
+			cursor.execute(query, data['ticket_ID'])
+			result = cursor.fetchone()
+			dep_date = datetime.datetime.strptime(departure_date, "%Y-%m-%d")
+			dep_time = datetime.datetime.strptime(departure_time, "%H:%M")
+			com_date = datetime.datetime.combine(dep_date.date(), dep_time.time())
+			now_date = datetime.datetime.now()
+			now_date += datetime.timedelta(days=1)
+			if(now_date < com_date):
+				query = 'DELETE FROM Purchase WHERE ticket_ID = %s'
+				cursor.execute(query, (data['ticket_ID']))
+				conn.commit()
+				query = 'DELETE FROM Ticket WHERE ticket_ID = %s'
+				cursor.execute(query, (data['ticket_ID']))
+				conn.commit()
+				cursor.close()
+				cancel_message = 'Successfully deleted'
+				return render_template("customer_home.html", cancel_message = cancel_message, customer_email = customer_email)
+			else:
+				no_cancel_error = 'Could not cancel the flight, since the date is less than 24 hour'
+				return render_template('customer_home.html', no_cancel_error = no_cancel_error, customer_email = customer_email)
+
 		else:
 			no_cancel_error = 'Could not cancel the flight'
 			return render_template('customer_home.html', no_cancel_error = no_cancel_error, customer_email = customer_email)
 	else:
-		return render_template('index.html')
+		return render_template('customer_home.html', customer_email = customer_email)
 
+
+
+			
 
 #################################################################################################################
 
