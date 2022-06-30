@@ -912,117 +912,133 @@ def add_airplane():
 		return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
 
 #################################################################################################################
-
 #TODO: Staff adds new airport in the system
 #Author: Justin Li
 @app.route('/add_airport', methods=['GET', 'POST'])
 def add_airport():
-	cursor = conn.cursor()
-	airport_name = request.form['airport_name']
-	airport_city = request.form['airport_city']
-	airport_cout = request.form['airport_country']
-	airport_type = request.form['airport_type']
-	query = 'INSERT INTO AIRPORT (airport_name, airport_city, airport_country, airport_type) VALUES (%s, %s, %s, %s)'
-	cursor.execute(query, (airport_name, airport_city, airport_cout, airport_type))
-	conn.commit()
-	conn.close()
-	return redirect(url_for('staff_home'))
+    cursor = conn.cursor();
+    user_name = session['user_name']
+    if request.method == 'POST':
+        airport_name = request.form['airport_name']
+        airport_city = request.form['airport_city']
+        airport_cout = request.form['airport_country']
+        airport_type = request.form['airport_type']
+        if airport_name != None and airport_city != None and airport_cout != None and airport_type != None:
+            query = 'SELECT * FROM Airport WHERE airport_name = %s'
+            cursor.execute(query, (airport_name))
+            data = cursor.fetchone()
+            if (data):
+                airportExistError = "Sorry, this airport already exist. Please try another one."
+                return render_template('staff_home.html', user_name = user_name, airportExistError = airportExistError)
+            else:
+                query = 'INSERT INTO AIRPORT (airport_name, airport_city, airport_country, airport_type) VALUES (%s, %s, %s, %s)'
+                cursor.execute(query, (airport_name, airport_city, airport_cout, airport_type))
+                conn.commit()
+                cursor.close()
+                addAirportSucc = 'Successfully added an airport'
+                return render_template('staff_home.html', user_name = user_name , addAirportSucc = addAirportSucc)
+    else:
+        return render_template('staff_home.html', user_name = user_name)
+
 
 #TODO: Staff views the rating and comments of the flight, along with the average rating
 #Author: Justin Li
-@app.route('/view_rating')
+@app.route('/view_rating', methods=['GET', 'POST'])
 def view_rating():
     cursor = conn.cursor();
-    customer_email = request.form['cus_email']
-    airline_name = request.form['airline_name']
-    airline_rating = request.form['air_rating']
-    airline_comment = request.form['air_comment']
-    query = 'SELECT cus_email, airline_name, air_rating, air_comment FROM Taken NATURAL JOIN Airline_Staff'
-    cursor.execute(query)
-    conn.commit
-    #now, view the average
-    query = 'SELECT AVG(air_rating) FROM Taken NATURAL JOIN Airline_staff'
-    cursor.execute(query)
-    conn.commit()
-    cursor.close()
-    return redirect(url_for('staff_home'))
+    user_name = session['user_name']
+    if request.method == 'POST':
+        airline_name = request.form['airline_name']
+        query = 'SELECT airline_name FROM Airline_staff WHERE user_name = %s'
+        cursor.execute(query, (user_name))
+        data = cursor.fetchone()
+        airline = data['airline_name']
+        if airline_name != None:
+            query = 'SELECT rating, comment FROM Taken NATURAL JOIN Airline_Staff WHERE airline_name = %s'
+            cursor.execute(query, (airline_name))
+            data1 = cursor.fetchone()
+            #now, view the average
+            query = 'SELECT AVG(airline_rating) FROM Taken WHERE airline_name = %s'
+            cursor.execute(query, (airline_name))
+            data2 = cursor.fetchall()
+            cursor.close()
+            return render_template('staff_home.html', user_name = user_name)
+    else:
+        return render_template('staff_home.html', user_name = user_name)
+
 
 #TODO: Staff views the most frequent customer
 #Author: Justin Li
-@app.route('/frequent_customer')
+@app.route('/frequent_customer', methods=['GET', 'POST'])
 def frequent_customer():
     cursor = conn.cursor();
-    customer_name = request.form['cus_name']
-    customer_email = request.form['cus_email']
-    ticket_ID = request.form['ticket_id']
-    query = 'SELECT MAX(ticket_id) FROM Customer NATURAL JOIN Purchase where Customer.cus_email = Purchase.cus_email GROUP BY Customer.cus_email'
-    cursor.execute(query)
-    conn.commit
-    cursor.close()
-    return redirect(url_for('staff_home'))
+    user_name = session['user_name']
+    if request.method == 'POST':
+        query = 'SELECT customer_email FROM Customer NATURAL JOIN Purchase GROUP BY customer_email ORDER BY count(ticket_id) DESC LIMIT 1'
+        cursor.execute(query)
+        customers = cursor.fetchall()
+        cursor.close()
+        return render_template('staff_home.html', user_name = user_name)
+    else:
+        return render_template('staff_home.html', user_name = user_name)
 
 #TODO: Staff views all flights of a customer
 #Author: Justin Li
-@app.route('/view_customer_flights')
+@app.route('/view_customer_flights', methods=['GET', 'POST'])
 def view_customer_flights():
     cursor = conn.cursor();
-    customer_name = request.form['cus_name']
-    customer_email = request.form['cus_email']
-    ticket_ID = request.form['ticket_id']
-    flight_number = request.form['flight_num']
-    departure_date = request.form['depart_date']
-    departure_time = request.form['depart_time']
-    departure_airport = request.form['depart_airport']
-    arrival_date = request.form['arri_date']
-    arrival_time = request.form['arri_time']
-    arrival_airport = request.form['arri_airport']
-    query = 'SELECT flight_num, depart_airport, depart_date, depar_time, arri_airport, arri_date, arri_time FROM Customer NATURAL JOIN Purchase NATURAL JOIN Ticket NATURAL JOIN Flight WHERE Customer.cus_email = %s'
-    cursor.execute(query)
-    conn.commit
-    cursor.close()
-    return redirect(url_for('staff_home'))
-
+    user_name = session['user_name']
+    if request.method == 'POST':
+        customer_email = request.form['customer_email']
+        if customer_email != None:
+            query = 'SELECT flight_number FROM Customer NATURAL JOIN Ticket WHERE customer_email = %s'
+            cursor.execute(query, (customer_email))
+            customers = cursor.fetchall()
+        cursor.close()
+        return render_template('staff_home.html', user_name = user_name, customers = customers)
+    else:
+        return render_template('staff_home.html', user_name = user_name, customers = customers)
 #TODO: Staff views reports
 #Author: Justin Li
-@app.route('/view_reports')
+@app.route('/view_reports', methods=['GET', 'POST'])
 def view_reports():
-    cursor = conn.cursor();
-    flight_number = request.form['flight_num']
-    departure_date = request.form['depart_date']
-    departure_time = request.form['depart_time']
-    departure_airport = request.form['depart_airport']
-    arrival_date = request.form['arri_date']
-    arrival_time = request.form['arri_time']
-    arrival_airport = request.form['arri_airport']
-    flight_status = request.form['flight_status']
-    airline_name = request.form['airline_name']
-    user_name = request.form['user_name']
-    query = 'SELECT flight_status FROM Flight NATURAL JOIN Airline_staff WHERE Flight.airline_name = Airline_staff.airline_name'
-    cursor.execute(query)
-    conn.commit
-    cursor.close()
-    return redirect(url_for('staff_home'))
+	cursor = conn.cursor()
+	user_name = session['user_name']
+	if request.method == 'POST':
+		start = request.form['start_date']
+		end = request.form['end_date']
+		query = 'SELECT airline_name FROM Airline_staff WHERE user_name = %s'
+		cursor.execute(query, (user_name))
+		data = cursor.fetchone()
+		airline = data['airline_name']
+		if start != "" and end != "":
+			query = 'SELECT COUNT(ticket_id) AS num_tickets FROM Ticket WHERE airline_name = %s AND purchase_date >= %s AND purchase_date <= %s'
+			cursor.execute(query, (airline, start, end))
+			data = cursor.fetchone()
+			custom_num_tickets = data['num_tickets']
+			cursor.close()
+			return render_template('staff_home.html', user_name = user_name, custom_num_tickets = custom_num_tickets, start_date = start, end_date = end)
+		elif start == "" and end == "":
+			query = 'SELECT COUNT(ticket_id) AS num_tickets FROM Ticket WHERE airline_name = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 YEAR) AND purchase_date <= CURRENT_DATE()'
+			cursor.execute(query, (airline))
+			data = cursor.fetchone()
+			last_year_num = data['num_tickets']
+			query = 'SELECT COUNT(ticket_id) AS num_tickets FROM Ticket WHERE airline_name = %s AND purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH) AND purchase_date <= CURRENT_DATE()'
+			cursor.execute(query, (airline))
+			data = cursor.fetchone()
+			last_month_num = data['num_tickets']
+			return render_template('staff_home.html', user_name = user_name, last_year_num = last_year_num, last_month_num = last_month_num)
+		else:
+			noDateError = 'Please specify a correct date range'
+			return render_template('staff_home.html', user_name = user_name, noDateError = noDateError)
+	else:
+		return render_template('staff_home.html', user_name = user_name)
 
 #TODO: Staff views earned revenue
 #Author: Justin Li
-@app.route('/view_revenue')
+@app.route('/view_revenue', methods=['GET', 'POST'])
 def view_revenue():
-    cursor = conn.cursor();
-    flight_number = request.form['flight_num']
-    departure_date = request.form['depart_date']
-    departure_time = request.form['depart_time']
-    departure_airport = request.form['depart_airport']
-    arrival_date = request.form['arri_date']
-    arrival_time = request.form['arri_time']
-    arrival_airport = request.form['arri_airport']
-    base_price = request.form['base_price']
-    airline_name = request.form['airline_name']
-    user_name = request.form['user_name']
-    query = 'SELECT SUM(base_price) FROM Flight NATURAL JOIN Airline_staff WHERE Airline_staff.airline_name = Flight.airline_name'
-    cursor.execute(query)
-    conn.commit
-    cursor.close()
-    return redirect(url_for('staff_home'))
+    pass
 
 #TODO: Staff logout
 #Author: Justin Li
@@ -1039,4 +1055,5 @@ app.secret_key = 'some key that you will never guess'
 
 #Run the app on localhost port 5000
 if __name__ == "__main__":
-	app.run('127.0.0.1', 5000, debug = True)
+    app.run('127.0.0.1', 5000, debug = True)
+

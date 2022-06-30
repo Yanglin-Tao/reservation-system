@@ -163,14 +163,41 @@
     <input type="submit" value = "View all flights of this customer" />
 </form>
 <table>
-    <th>Date range</th>
+    <th>Start Date</th>
+    <th>End Date</th>
     <th>Tickets sold</th>
+    <tr>
+        <td>{{start_date}}</td>
+        <td>{{end_date}}</td>
+        <td>{{custom_num_tickets}}</td>
+    </tr>
+</table>
+<br>
+<table>
+    <th>Time</th>
+    <th>Tickets sold</th>
+    <tr>
+        <td>Last year</td>
+        <td>{{last_year_num}}</td>
+    </tr>
+</table>
+<br>
+<table>
+    <th>Time</th>
+    <th>Tickets sold</th>
+    <tr>
+        <td>Last month</td>
+        <td>{{last_month_num}}</td>
+    </tr>
 </table>
 
 <form class = action action="/view_reports" method="POST">
     From: <input type="date" name = "start_date" placeholder="From: YYYY-MM-DD"/> &nbsp;
     To: <input type="date" name = "end_date" placeholder="To: YYYY-MM-DD"/> <br>
     <input type="submit" value = "View reports" />
+    {% if noDateError %}
+        <p class="error"><strong>Error:</strong> {{noDateError}}</p>
+    {% endif %}
 </form>
 
 <table>
