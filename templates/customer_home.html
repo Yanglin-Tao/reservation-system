@@ -47,7 +47,32 @@
         <th>Arrival time</th>
         <th>Arrival airport</th>
         <th>Price</th>
-        {% for line in search_flights %}
+        {% for line in go_flights %}
+        <tr>
+            <td>{{line['airline_name']}}</td>
+            <td>{{line['flight_number']}}</td>
+            <td>{{line['departure_date']}}</td>
+            <td>{{line['departure_time']}}</td>
+            <td>{{line['departure_airport']}}</td>
+            <td>{{line['arrival_date']}}</td>
+            <td>{{line['arrival_time']}}</td>
+            <td>{{line['arrival_airport']}}</td>
+            <td>{{line['base_price']}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <table>
+        <th>Airline name</th>
+        <th>Flight number</th>
+        <th>Departure date</th>
+        <th>Departure time</th>
+        <th>Departure airport</th>
+        <th>Arrival date</th>
+        <th>Arrival time</th>
+        <th>Arrival airport</th>
+        <th>Price</th>
+        {% for line in return_flights %}
         <tr>
             <td>{{line['airline_name']}}</td>
             <td>{{line['flight_number']}}</td>
