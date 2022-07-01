@@ -524,9 +524,6 @@ def cancel_trip():
 		query = 'SELECT ticket_ID FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_date = %s and flight_number = %s and departure_time = %s and airline_name = %s and departure_date >= CURDATE()'
 		data = cursor.fetchone()
 		if(data):
-			query = 'SELECT * FROM Ticket WHERE ticket_ID = %s'
-			cursor.execute(query, data['ticket_ID'])
-			result = cursor.fetchone()
 			dep_date = datetime.datetime.strptime(departure_date, "%Y-%m-%d")
 			dep_time = datetime.datetime.strptime(departure_time, "%H:%M")
 			com_date = datetime.datetime.combine(dep_date.date(), dep_time.time())
@@ -551,10 +548,7 @@ def cancel_trip():
 			return render_template('customer_home.html', no_cancel_error = no_cancel_error, customer_email = customer_email)
 	else:
 		return render_template('customer_home.html', customer_email = customer_email)
-
-
-
-			
+				
 
 #################################################################################################################
 
