@@ -119,13 +119,19 @@
     Airport country: <input type="text" name = "airport_country" placeholder="Airport country" required/> &nbsp;
     Airport type: <input type="text" name = "airport_type" placeholder="Airport type" required/> <br>
     <input type="submit" value = "Add new airport in the system" />
+    {% if airportExistError %}
+        <p class="error"><strong>Error:</strong> {{airportExistError}}</p>
+    {% endif %}
+    {% if addAirportSucc %}
+        <p class="message">{{addAirportSucc}}</p>
+    {% endif %}
 </form>
 
 
 <table>
     <th>Rating</th>
     <th>Comment</th>
-    {% for line in ratings %}
+    {% for line in rating_comment %}
         <tr>
             <td>{{line['rating']}}</td>
             <td>{{line['comment']}}</td>
@@ -135,16 +141,27 @@
 <br>
 <table>
     <th>Average rating</th>
+    <tr>
+        <td>{{average_rating}}</td>
+    </tr>
 </table>
 <form class = action action="/view_rating" method="POST">
     Flight number: <input type="number" name = "flight_number" placeholder="Flight number" required/> &nbsp;
     Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> <br>
-    Departure time: <input type="time" name = "departure_time" placeholder="Departure time: hh:mm:ss" required/> &nbsp;
-    Airline name: <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
+    Departure time: <input type="time" name = "departure_time" placeholder="Departure time: hh:mm:ss" required/> <br>
     <input type="submit" value = "View flight ratings" />
+    {% if noDataError %}
+        <p class="error"><strong>Error:</strong> {{noDataError}}</p>
+    {% endif %}
+    {% if invalidFlightError %}
+        <p class="error"><strong>Error:</strong> {{invalidFlightError}}</p>
+    {% endif %}
 </form>
 <table>
     <th>Most frequent customer within the last year</th>
+    <tr>
+        <td>{{freq_customer}}</td>
+    </tr>
 </table>
 <form class = action action="/frequent_customer" method="POST">
     <input type="submit" value = "View frequent customer" />
@@ -157,10 +174,24 @@
     <th>Arrival date</th>
     <th>Arrival time</th>
     <th>Arrival airport</th>
+    {% for line in customer_flights %}
+    <tr>
+        <td>{{line['flight_number']}}</td>
+        <td>{{line['departure_date']}}</td>
+        <td>{{line['departure_time']}}</td>
+        <td>{{line['departure_airport']}}</td>
+        <td>{{line['arrival_date']}}</td>
+        <td>{{line['arrival_time']}}</td>
+        <td>{{line['arrival_airport']}}</td>
+    </tr>
+    {% endfor %}
 </table>
 <form class = action action="/view_customer_flights" method="POST">
     <input type="text" name = "customer_email" placeholder="Customer email" required/> <br>
     <input type="submit" value = "View all flights of this customer" />
+    {% if noEmailError %}
+        <p class="error"><strong>Error:</strong> {{noEmailError}}</p>
+    {% endif %}
 </form>
 <table>
     <th>Start Date</th>
@@ -201,8 +232,21 @@
 </form>
 
 <table>
-    <th>Date Range</th>
+    <th>Time</th>
     <th>Total revenue</th>
+    <tr>
+        <td>Past Month</td>
+        <td>{{last_year_revenue}}</td>
+    </tr>
+</table>
+<br>
+<table>
+    <th>Time</th>
+    <th>Total revenue</th>
+    <tr>
+        <td>Past Month</td>
+        <td>{{last_month_revenue}}</td>
+    </tr>
 </table>
 
 <form class = action action="/view_revenue" method="POST">
