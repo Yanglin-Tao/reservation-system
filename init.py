@@ -394,7 +394,7 @@ def customer_search_flights():
 		arri_city = request.form['arrival_city']
 		customer_email = session['customer_email']
 		if dept_airport != "" and arri_airport != "" and dept_date != "" and return_date == "" and dept_city == "" and arri_city == "":
-			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight WHERE departure_date = %s AND airport_city = %s AND airport_city = %s AND %s > CURRENT_DATE()'
+			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
 			go_flights = cursor.fetchall()	
 			if (go_flights):
