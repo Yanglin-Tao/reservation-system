@@ -1,11 +1,22 @@
+File description
+Team members:
+Yanglin Tao (yt2061@nyu.edu)
+Tianzuo Liu (tl3119@nyu.edu)
+Yuting (Justin) Li (yl7685@nyu.edu)
+Repository on GitHub: reservation-system
+
+*** excludes local cache and system files
+
 /init.py
 --> runs the Flask app
 
 /sql/system.sql
 --> creates tables for the database 'system'
+***changes made from Project Part II: the sizes of variables has been extended and the departure_date_time has been separated into departure_date and departure_time
 
 /sql/test_insertion.sql
 --> inserts test data for the database 'system
+***changes made from Project Part II: more test cases has been added
 
 /static/index_page.jpg
 --> background image
@@ -41,10 +52,15 @@
 --> generates staff_register page
 
 /README.md
---> brief desciption of the project
+--> brief description of the project
 
 /summary/file_desciption.txt
 --> a list of the files in the application and what’s in each file
 
 /summary/use_case_summary.txt
 -->  lists all of the use cases and the queries executed by them (with brief explanation)
+
+/summary/workload_distribution.txt
+-->  explains who did which part of the project
+
+

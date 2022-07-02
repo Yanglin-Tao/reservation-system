@@ -1,9 +1,13 @@
-Yanglin Tao is responsible for frontend development, MySQL configuration, and backend use cases including general_show_flights(), 
-general_check_status(), customer_login_auth(), customer_rating(), track_spending(), customer_logout(), staff_view_flights(), 
-create_flight(), change_status(), add_airplane(), etc.
+Workload distribution
+Team members:
+Yanglin Tao (yt2061@nyu.edu)
+Tianzuo Liu (tl3119@nyu.edu)
+Yuting (Justin) Li (yl7685@nyu.edu)
+Repository on GitHub: reservation-system
 
-Tianzuo Liu focuses on backend development, who is responsible for use cases staff_login_auth(), customer_register_auth(), 
-staff_register_auth(), customer_home(), customer_view_flights(), customer_search_flights(), purchase_ticket(), cancel_trip(), etc
+Yanglin Tao is responsible for frontend development, MySQL configuration, and backend use cases including general_show_flights(), general_check_status(), customer_login_auth(), customer_rating(), track_spending(), customer_logout(), staff_view_flights(), create_flight(), change_status(), add_airplane(), etc.
 
-Tuting Li is responsible for developing use cases including add_airport(), view_rating(), frequent_customer(), view_customer_flights(), 
-view_reports(), view_revenue(), staff_logout(), etc
+Tianzuo Liu focuses on backend development, who is responsible for use cases staff_login_auth(), customer_register_auth(), staff_register_auth(), customer_home(), customer_view_flights(), customer_search_flights(), purchase_ticket(), cancel_trip(), etc
+
+Tuting Li is responsible for developing use cases including add_airport(), view_rating(), frequent_customer(), view_customer_flights(), view_reports(), view_revenue(), staff_logout(), etc (co-authored by Yanglin Tao and Tianzuo Liu)
+
