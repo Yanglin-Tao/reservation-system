@@ -98,7 +98,7 @@ def general_show_flights():
 			else:
 				noGoError = 'Sorry, no trip found.'
 				return render_template('index.html', noGoError = noGoError)
-		elif dept_airport == "" and arri_airport == "" and dept_city != "" and arri_city != "":
+		elif dept_airport != "" and arri_airport != "" and dept_city != "" and arri_city != "":
 			invalidSearchError = 'Please enter only departure/arrival city or departure/arrival airport'
 			return render_template('index.html', invalidSearchError = invalidSearchError)
 		else:
@@ -462,7 +462,7 @@ def customer_search_flights():
 			else:
 				noGoError = 'Sorry, no trip found.'
 				return render_template('customer_home.html', noGoError = noGoError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
-		elif dept_airport == "" and arri_airport == "" and dept_city != "" and arri_city != "":
+		elif dept_airport != "" and arri_airport != "" and dept_city != "" and arri_city != "":
 			invalidSearchError = 'Please enter only departure/arrival city or departure/arrival airport'
 			return render_template('customer_home.html', invalidSearchError = invalidSearchError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 		else:
