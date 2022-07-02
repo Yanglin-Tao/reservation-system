@@ -19,14 +19,12 @@ conn = pymysql.connect(host='localhost',
 
 #Define route for index page
 #Author: Yanglin Tao
-# test: pass
 @app.route('/')
 def hello():
 	return render_template('index.html')
 
 #Show all future flights to anyone using the system
 #Author: Yanglin Tao
-# test: pass
 @app.route('/general_show_flights', methods=['GET', 'POST'])
 def general_show_flights():
 	cursor = conn.cursor()
@@ -37,6 +35,7 @@ def general_show_flights():
 		arri_city = request.form['arrival_city']
 		dept_date = request.form['departure_date']
 		return_date = request.form['return_date']
+		# search for one way trip by airports
 		if dept_airport != "" and arri_airport != "" and dept_date != "" and return_date == "" and dept_city == "" and arri_city == "":
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
@@ -45,9 +44,13 @@ def general_show_flights():
 			if(go_flights):
 				return render_template('index.html', go_flights = go_flights)
 			else:
-				noReturnError = 'Sorry, no trip found.'
-				return render_template('index.html', noReturnError = noReturnError)
+				noGoError = 'Sorry, no trip found.'
+				return render_template('index.html', noGoError = noGoError)
+		# search for round trip by airports
 		elif dept_airport != "" and arri_airport != "" and dept_date != "" and return_date != "" and dept_city == "" and arri_city == "":
+			if dept_date > return_date:
+				dateError = "Arrival date must be after departure date."
+				return render_template('index.html', dateError = dateError)
 			# check if there is a return trip
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (return_date, arri_airport, dept_airport, return_date))
@@ -56,11 +59,19 @@ def general_show_flights():
 				query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
 				cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
 				go_flights = cursor.fetchall()	
-				return render_template('index.html', return_flights = return_flights, go_flights = go_flights)
+				if(go_flights):
+					return render_template('index.html', return_flights = return_flights, go_flights = go_flights)
+				else:
+					noGoError = "Sorry, no trip found"
+					return render_template('index.html', noGoError = noGoError)
 			else:
 				noReturnError = 'Sorry, no return trip found.'
 				return render_template('index.html', noReturnError = noReturnError)
+		# search for round trip by city
 		elif dept_airport == "" and arri_airport == "" and dept_date != "" and return_date != "" and dept_city != "" and arri_city != "":
+			if dept_date > return_date:
+				dateError = "Arrival date must be after departure date."
+				return render_template('index.html', dateError = dateError)
 			# check if there is a return trip
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (arri_city, dept_city, return_date, return_date))
@@ -69,10 +80,15 @@ def general_show_flights():
 				query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
 				cursor.execute(query, (dept_city, arri_city, dept_date, dept_date))
 				go_flights = cursor.fetchall()
-				return render_template('index.html', return_flights = return_flights, go_flights = go_flights)
+				if(go_flights):
+					return render_template('index.html', return_flights = return_flights, go_flights = go_flights)
+				else:
+					noGoError = "Sorry, no trip found"
+					return render_template('index.html', noGoError = noGoError)
 			else:
 				noReturnError = 'Sorry, no return trip found.'
 				return render_template('index.html', noReturnError = noReturnError)
+		# search for one way by city
 		elif dept_airport == "" and arri_airport == "" and dept_date != "" and return_date == "" and dept_city != "" and arri_city != "":
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (dept_city, arri_city, dept_date, dept_date))
@@ -80,8 +96,8 @@ def general_show_flights():
 			if(go_flights):
 				return render_template('index.html', go_flights = go_flights)
 			else:
-				noReturnError = 'Sorry, no trip found.'
-				return render_template('index.html', noReturnError = noReturnError)
+				noGoError = 'Sorry, no trip found.'
+				return render_template('index.html', noGoError = noGoError)
 		else:
 			invalidSearchError = 'Invalid data'
 			return render_template('index.html', invalidSearchError = invalidSearchError)
@@ -90,7 +106,6 @@ def general_show_flights():
 
 #Check flight status to anyone using the system
 #Author: Yanglin Tao
-# test: pass
 @app.route('/general_check_status', methods=['GET', 'POST'])
 def general_check_status():
 	cursor = conn.cursor()
@@ -113,35 +128,30 @@ def general_check_status():
 
 #Define route for customer login
 #Author: Yanglin Tao
-# test: pass
 @app.route('/customer_login')
 def customer_login():
 	return render_template('customer_login.html')
 
 #Define route for customer register
 #Author: Yanglin Tao
-# test: pass
 @app.route('/customer_register')
 def customer_register():
 	return render_template('customer_register.html')
 
 #Define route for staff login
 #Author: Yanglin Tao
-# test: pass
 @app.route('/staff_login')
 def staff_login():
 	return render_template('staff_login.html')
 
 #Define route for staff register
 #Author: Yanglin Tao
-# test: pass
 @app.route('/staff_register')
 def staff_register():
 	return render_template('staff_register.html')
 
 #Authenticates customer login
 #Author: Yanglin Tao
-# test: pass
 @app.route('/customer_login_auth', methods=['GET', 'POST'])
 def customer_login_auth():
 	#grabs information from the forms
@@ -168,9 +178,8 @@ def customer_login_auth():
 		error = 'Invalid email address or password'
 		return render_template('customer_login.html', error=error)
 
-#TODO: Authenticates staff login
+#Authenticates staff login
 #Author: Tianzuo Liu
-# test: pass
 @app.route('/staff_login_auth', methods=['GET', 'POST'])
 def staff_login_auth():
 	if request.method == 'POST':
@@ -199,15 +208,13 @@ def staff_login_auth():
 		return render_template('staff_login.html')
 
 
-#TODO: Authenticates customer register
+#Authenticates customer register
 #Author: Tianzuo Liu
-# test: pass
 @app.route('/customer_register_auth', methods=['GET', 'POST'])
 def customer_register_auth():
 	customer_name = request.form['customer_name']
 	customer_email = request.form['customer_email']
 	customer_password = (hashlib.md5((request.form['customer_password']).encode())).hexdigest()
-	# customer_password = request.form['customer_password']
 	building_number = request.form['building_number']
 	street = request.form['street']
 	city = request.form['city']
@@ -239,14 +246,12 @@ def customer_register_auth():
 		cursor.close()
 		return render_template('index.html')
 
-#TODO: Authenticates staff register
+#Authenticates staff register
 #Author: Tianzuo Liu
-# test: pass
 @app.route('/staff_register_auth', methods=['GET', 'POST'])
 def staff_register_auth():
 	user_name = request.form['user_name']
 	staff_password = (hashlib.md5((request.form['staff_password']).encode())).hexdigest()
-	# staff_password = request.form['staff_password']
 	first_name = request.form['first_name']
 	last_name = request.form['last_name']
 	date_of_birth = request.form['date_of_birth']
@@ -343,9 +348,8 @@ def monthly_spending_last_year():
 	cursor.close()
 	return spending
 
-#TODO: Customer home
+#Customer home
 #Author: Tianzuo Liu
-# test: pass
 @app.route('/customer_home')
 def customer_home():
 	customer_email = session['customer_email']
@@ -353,29 +357,28 @@ def customer_home():
 	spending = monthly_spending_last_year()
 	return render_template('customer_home.html', customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 
-#TODO: Customer view all future flights
+#Customer view all future flights
 #Author: Tianzuo Liu
 @app.route('/customer_view_flights', methods=['GET', 'POST'])
 def customer_view_flights():
 	cursor = conn.cursor()
 	customer_email = session['customer_email']
+	total_last_year = spending_last_year()
+	spending = monthly_spending_last_year()
 	if request.method == 'POST':
-
 		query ='SELECT * FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_date >= CURDATE()'
 		cursor.execute(query, (session['customer_email']))
 		future_flights = cursor.fetchall()
-
 		if(future_flights):
-			return render_template('customer_home.html', future_flights = future_flights, customer_email = customer_email)
+			return render_template('customer_home.html', future_flights = future_flights, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 		else:
 			no_future_error = 'No future flight'
-		return render_template('customer_home.html', no_future_error = no_future_error, customer_email = customer_email)
+		return render_template('customer_home.html', no_future_error = no_future_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 	else:
-		return render_template('index.html')
+		return render_template('customer_home.html', customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 
-#TODO: Customer searches for flights
+#Customer searches for flights
 #Author: Tianzuo Liu
-#test: pass for one way
 '''
 Search for future flights (one way or round trip) based on source city/airport name, 
 destination city/airport name, dates (departure or return).
@@ -385,6 +388,8 @@ destination city/airport name, dates (departure or return).
 @app.route('/customer_search_flights', methods=['GET', 'POST'])
 def customer_search_flights():
 	cursor = conn.cursor()
+	total_last_year = spending_last_year()
+	spending = monthly_spending_last_year()
 	if request.method == 'POST':
 		dept_airport = request.form['departure_airport']
 		arri_airport = request.form['arrival_airport']
@@ -393,28 +398,41 @@ def customer_search_flights():
 		dept_city = request.form['departure_city']
 		arri_city = request.form['arrival_city']
 		customer_email = session['customer_email']
+		# search one way by airport
 		if dept_airport != "" and arri_airport != "" and dept_date != "" and return_date == "" and dept_city == "" and arri_city == "":
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
 			go_flights = cursor.fetchall()	
 			if (go_flights):
-				return render_template('customer_home.html', go_flights = go_flights, customer_email = customer_email)
+				return render_template('customer_home.html', go_flights = go_flights, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 			else:
-				noReturnError = 'Sorry, no trip found.'
-				return render_template('customer_home.html', noReturnError = noReturnError, customer_email = customer_email)
+				noGoError = 'Sorry, no trip found.'
+				return render_template('customer_home.html', noGoError = noGoError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+		# search round trip by airport
 		elif dept_airport != "" and arri_airport != "" and dept_date != "" and return_date != "" and dept_city == "" and arri_city == "":
+			if dept_date > return_date:
+				dateError = "Arrival date must be after departure date."
+				return render_template('customer_home.html', customer_email = customer_email, total_last_year = total_last_year, spending = spending, dateError = dateError)
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (return_date, arri_airport, dept_airport, return_date))
 			return_flights = cursor.fetchall()
 			if (return_flights):
 				query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight WHERE departure_date = %s AND departure_airport = %s AND arrival_airport = %s AND %s > CURRENT_DATE()'
 				cursor.execute(query, (dept_date, dept_airport, arri_airport, dept_date))
-				go_flights = cursor.fetchall()	
-				return render_template('customer_home.html', return_flights = return_flights, go_flights = go_flights, customer_email = customer_email)
+				go_flights = cursor.fetchall()
+				if (go_flights):
+					return render_template('customer_home.html', return_flights = return_flights, go_flights = go_flights, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+				else:
+					noGoError = 'Sorry, no trip found.'
+					return render_template('customer_home.html', noGoError = noGoError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 			else:
 				noReturnError = 'Sorry, no return trip found.'
-				return render_template('customer_home.html', noReturnError = noReturnError, customer_email = customer_email)
+				return render_template('customer_home.html', noReturnError = noReturnError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+		# search round trip by city
 		elif dept_airport == "" and arri_airport == "" and dept_date != "" and return_date != "" and dept_city != "" and arri_city != "":
+			if dept_date > return_date:
+				dateError = "Arrival date must be after departure date."
+				return render_template('customer_home.html', customer_email = customer_email, total_last_year = total_last_year, spending = spending, dateError = dateError)
 			# check if there is a return trip
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (arri_city, dept_city, return_date, return_date))
@@ -423,32 +441,37 @@ def customer_search_flights():
 				query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
 				cursor.execute(query, (dept_city, arri_city, dept_date, dept_date))
 				go_flights = cursor.fetchall()
-				return render_template('customer_home.html', return_flights = return_flights, go_flights = go_flights, customer_email = customer_email)
+				if (go_flights):
+					return render_template('customer_home.html', return_flights = return_flights, go_flights = go_flights, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+				else:
+					noGoError = 'Sorry, no trip found.'
+					return render_template('customer_home.html', noGoError = noGoError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 			else:
 				noReturnError = 'Sorry, no return trip found.'
-				return render_template('customer_home.html', noReturnError = noReturnError, customer_email = customer_email)
+				return render_template('customer_home.html', noReturnError = noReturnError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+		# search one way by airport
 		elif dept_airport == "" and arri_airport == "" and dept_date != "" and return_date == "" and dept_city != "" and arri_city != "":
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport, airline_name, base_price FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date = %s AND %s > CURRENT_DATE()'
 			cursor.execute(query, (dept_city, arri_city, dept_date, dept_date))
 			go_flights = cursor.fetchall()
 			if(go_flights):
-				return render_template('customer_home.html', go_flights = go_flights, customer_email = customer_email)
+				return render_template('customer_home.html', go_flights = go_flights, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 			else:
-				noReturnError = 'Sorry, no trip found.'
-				return render_template('customer_home.html', noReturnError = noReturnError, customer_email = customer_email)
+				noGoError = 'Sorry, no trip found.'
+				return render_template('customer_home.html', noGoError = noGoError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 		else:
 			invalidSearchError = 'Invalid data'
-			return render_template('customer_home.html', invalidSearchError = invalidSearchError, customer_email = customer_email)
+			return render_template('customer_home.html', invalidSearchError = invalidSearchError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 	else:
-		return render_template('customer_home.html', customer_email = customer_email)
+		return render_template('customer_home.html', customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 
-	
-#TODO: Customer purchases a ticket (from result of searching flight)
+#Customer purchases a ticket (from result of searching flight)
 #Author: Tianzuo Liu
-#test: pass for one way
 @app.route('/purchase_ticket', methods=['GET', 'POST'])
 def purchase_ticket():
 	cursor = conn.cursor()
+	total_last_year = spending_last_year()
+	spending = monthly_spending_last_year()
 	if request.method == 'POST':
 		flight_number = request.form['flight_number']
 		dept_date = request.form['departure_date']
@@ -467,11 +490,10 @@ def purchase_ticket():
 		ticket_ID = str(random.randint(100000,200000))
 
 		if (new_data):
-			query = 'SELECT base_price FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+			query = 'SELECT base_price FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s AND departure_date > CURRENT_DATE()'
 			cursor.execute(query, (flight_number, dept_date, dept_time, airline_name))
 			data = cursor.fetchone()
-			# TODO: The sold price may be different from the base price. Handle the price increase mechanism.
-
+			# The sold price may be different from the base price. Handle the price increase mechanism.
 			query = 'SELECT COUNT(ticket_ID) FROM Ticket NATURAL JOIN Airplane NATURAL JOIN Flight WHERE flight_number = %s'
 			cursor.execute(query, (flight_number))
 			count_num = cursor.fetchone()
@@ -480,20 +502,18 @@ def purchase_ticket():
 			num_seats = cursor.fetchone()
 			sold_price = data['base_price']
 
-			# TODO: Should return error message if the card expiration date has passed.
+			# Should return error message if the card expiration date has passed.
 			if(datetime.datetime.now() > datetime.datetime.strptime(expiration_date, "%Y-%m-%d")):
 				card_exp_error = 'Sorry, the card expiration date has passed!'
-				return render_template('customer_home.html', card_exp_error = card_exp_error, customer_email = customer_email)
-			# TODO: Should return error message if the tickets of the flight is fully booked.
+				return render_template('customer_home.html', card_exp_error = card_exp_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+			# Should return error message if the tickets of the flight is fully booked.
 			if(count_num['COUNT(ticket_ID)'] == (int(num_seats['number_seats']))):
 				no_ticket_error = 'Sorry, there is no ticket!'
-				return render_template('customer_home.html', no_ticket_error = no_ticket_error, customer_email = customer_email)
+				return render_template('customer_home.html', no_ticket_error = no_ticket_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 			elif(count_num['COUNT(ticket_ID)'] >= (int(num_seats['number_seats']) * 0.6)):
 				sold_price = float(data['base_price'])
 				sold_price *= 1.2
-
-			insertion = 'INSERT INTO Ticket VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_DATE(), CURRENT_DATE(), %s, %s, %s, %s)'
-
+			insertion = 'INSERT INTO Ticket VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_TIME(), CURRENT_TIME(), %s, %s, %s, %s)'
 			cursor.execute(insertion, (ticket_ID, customer_email, sold_price, card_type, card_number, \
 				name_on_card, expiration_date, dept_date, dept_time,flight_number, airline_name))
 			conn.commit()
@@ -501,20 +521,25 @@ def purchase_ticket():
 			cursor.execute(purchase, (customer_email, ticket_ID))
 			conn.commit()
 			cursor.close()
+			total_last_year = spending_last_year()
+			spending = monthly_spending_last_year()
 			purchase_message = 'Successfully purchased ticket'
-			return render_template('customer_home.html', purchase_message = purchase_message, customer_email = customer_email)
+			return render_template('customer_home.html', purchase_message = purchase_message, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 		else:
 			no_purchase_error = 'Something wrong. Please try again'
-			return render_template('customer_home.html', no_purchase_error = no_purchase_error, customer_email = customer_email)
+			return render_template('customer_home.html', no_purchase_error = no_purchase_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 	else:
-		return render_template('customer_home.html', customer_email = customer_email)
+		return render_template('customer_home.html', customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 
-#TODO: Customer cancels a trip
+
+
+#Customer cancels a trip
 #Author: Tianzuo Liu
-#test: pass for one way
 @app.route('/cancel_trip', methods=['GET', 'POST'])
 def cancel_trip():
 	cursor = conn.cursor()
+	total_last_year = spending_last_year()
+	spending = monthly_spending_last_year()
 	if request.method == 'POST':
 		flight_number = request.form['flight_number']
 		departure_date = request.form['departure_date']
@@ -522,6 +547,7 @@ def cancel_trip():
 		airline_name = request.form['airline_name']
 		customer_email = session['customer_email']
 		query = 'SELECT ticket_ID FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_date = %s and flight_number = %s and departure_time = %s and airline_name = %s and departure_date >= CURDATE()'
+		cursor.execute(query, (session['customer_email'], departure_date, flight_number, departure_time, airline_name))
 		data = cursor.fetchone()
 		if(data):
 			dep_date = datetime.datetime.strptime(departure_date, "%Y-%m-%d")
@@ -537,22 +563,20 @@ def cancel_trip():
 				cursor.execute(query, (data['ticket_ID']))
 				conn.commit()
 				cursor.close()
-				cancel_message = 'Successfully deleted'
-				return render_template("customer_home.html", cancel_message = cancel_message, customer_email = customer_email)
+				total_last_year = spending_last_year()
+				spending = monthly_spending_last_year()
+				cancel_message = 'Successfully cancelled the trip'
+				return render_template("customer_home.html", cancel_message = cancel_message, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 			else:
 				no_cancel_error = 'Could not cancel the flight, since the date is less than 24 hour'
-				return render_template('customer_home.html', no_cancel_error = no_cancel_error, customer_email = customer_email)
-
+				return render_template('customer_home.html', no_cancel_error = no_cancel_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 		else:
 			no_cancel_error = 'Could not cancel the flight'
-			return render_template('customer_home.html', no_cancel_error = no_cancel_error, customer_email = customer_email)
+			return render_template('customer_home.html', no_cancel_error = no_cancel_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 	else:
-		return render_template('customer_home.html', customer_email = customer_email)
-				
+		return render_template('customer_home.html', customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 
-#################################################################################################################
-
-# TODO: Customer gives rating and comment
+# Customer gives rating and comment
 # Author: Yanglin Tao
 '''
 Customer will be able to rate and comment on their 
@@ -561,7 +585,6 @@ logged in.
 '''
 # input: flight_number, departure date, departure time, airline name
 # output: none
-# test: pass
 @app.route('/customer_rating', methods=['GET', 'POST'])
 def customer_rating():
 	cursor = conn.cursor();
@@ -596,12 +619,12 @@ def customer_rating():
 				commentSucc = 'Thanks for your feedback!'
 				return render_template('customer_home.html', commentSucc = commentSucc, total_last_year = total_last_year, spending = spending, customer_email = customer_email)
 		else:
-			noFlightError = 'There is no flight you are looking for. Please try again.'
+			noFlightError = 'There is no flight or past flight you are looking for. Please try again.'
 			return render_template('customer_home.html', noFlightError = noFlightError, total_last_year = total_last_year, spending = spending, customer_email = customer_email)
 	else: 
 		return render_template('customer_home.html', customer_email = customer_email)
 
-# TODO: Customer tracks spending
+# Customer tracks spending
 # Author: Yanglin Tao
 '''
 Default view will be total amount of money spent in the past year and a bar
@@ -612,7 +635,6 @@ month wise money spent within that range
 # default output: total_last_year, monthly_spending_last_year
 # input: start_date, end_date
 # output: total_spending, monthly_spending
-# test: pass
 @app.route('/track_spending', methods=['GET', 'POST'])
 def track_spending():
 	cursor = conn.cursor();
@@ -632,9 +654,8 @@ def track_spending():
 	else:
 		return render_template('customer_home.html', customer_email = email, total_last_year = total_last_year)
 
-# TODO: Customer logout
+# Customer logout
 # Author: Yanglin Tao
-# test: pass
 '''
 Customer logs out of the system
 '''
@@ -645,9 +666,8 @@ def customer_logout():
 	del session['customer_email']
 	return render_template('customer_logout.html')
 
-# TODO: Default show all airplanes
+# Default show all airplanes
 # Author: Yanglin Tao
-# test: pass
 def default_show_all_airplanes():
 	cursor = conn.cursor();
 	user_name = session['user_name']
@@ -690,9 +710,8 @@ def default_view_30days():
 	cursor.close()
 	return flights
 
-# TODO: Staff home
+# Staff home
 # Author: Yanglin Tao
-# test: pass
 @app.route('/staff_home')
 def staff_home():
 	user_name = session['user_name']
@@ -700,7 +719,7 @@ def staff_home():
 	flights = default_view_30days()
 	return render_template('staff_home.html', user_name = user_name, airplanes = airplanes, flights = flights)
 
-# TODO: Staff views flights
+# Staff views flights
 # Author: Yanglin Tao
 '''
 Defaults will be showing all the future flights operated by the airline he/she works for 
@@ -733,6 +752,8 @@ def staff_view_flights():
 		airline = data['airline_name']
 		# if there are inputs from user that specifies start_date, end_date, departure_airport, departure_city, 
 		# arrival_airport, and arrival_city
+		if start == "" and end != "" and dept_airport == "" and arri_airport == "" and dept_city == "" and arri_city == "":
+			return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
 		if start != "" and end != "" and dept_airport != "" and arri_airport != "" and dept_city == "" and arri_city == "":
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date >= %s AND departure_date <= %s AND departure_airport = %s AND arrival_airport = %s AND airline_name = %s'
 			cursor.execute(query, (start, end, dept_airport, arri_airport, airline))
@@ -764,7 +785,7 @@ def staff_view_flights():
 	else:
 		return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
 
-# TODO: Staff creates new flights
+# Staff creates new flights
 # Author: Yanglin Tao
 '''
 He or she creates a new flight, providing all the needed data, via forms. The 
@@ -776,9 +797,8 @@ future flights operated by the airline he/she works for the next 30 days.
 # input: flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, 
 # 			arrival_time, airplane_identification_number, airline_name
 # output: none
-# test: pass
 @app.route('/add_flight', methods=['GET', 'POST'])
-def create_flight():
+def add_flight():
 	cursor = conn.cursor();
 	user_name = session['user_name']
 	airplanes = default_show_all_airplanes()
@@ -798,6 +818,14 @@ def create_flight():
 		cursor.execute(query, (user_name))
 		data = cursor.fetchone()
 		airline = data['airline_name']
+		# check if the departure date is in the past
+		departure_date = datetime.datetime.strptime(dept_date, "%Y-%m-%d")
+		departure_time = datetime.datetime.strptime(dept_time, "%H:%M")
+		com_date = datetime.datetime.combine(departure_date.date(), departure_time.time())
+		now_date = datetime.datetime.now()
+		if com_date < now_date:
+			pastFlightError = 'Cannot create a flight in the past'
+			return render_template('staff_home.html', user_name = user_name, pastFlightError = pastFlightError, airplanes = airplanes, flights = flights)
 		# check if this is an existing flight
 		query = 'SELECT * FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
 		cursor.execute(query, (flight_num, dept_date, dept_time, airline))
@@ -816,6 +844,7 @@ def create_flight():
 				conn.commit()
 				cursor.close()
 				addFlightSucc = "Sucessfully added a flight"
+				flights = default_view_30days()
 				return render_template('staff_home.html', user_name = user_name, addFlightSucc = addFlightSucc, airplanes = airplanes, flights = flights)
 			else:
 				noPlaneError = 'This is a new airplane. Please add to the system first or try another.'
@@ -823,7 +852,7 @@ def create_flight():
 	else:
 		return render_template('staff_home.html', user_name = user_name, airplanes = airplanes, flights = flights)
 
-# TODO: Staff changes status of the flight
+# Staff changes status of the flight
 # Author: Yanglin Tao
 '''
 He or she changes a flight status (from on-time to delayed or vice versa) via 
@@ -831,7 +860,6 @@ forms.
 '''
 # input: flight_number, departure_date, departure_time, airline_name, status
 # output: none
-# test: pass
 @app.route('/change_status', methods=['GET', 'POST'])
 def change_status():
 	cursor = conn.cursor();
@@ -860,9 +888,8 @@ def change_status():
 	else:
 		return render_template('staff_home.html', user_name = user_name, airplanes = airplanes, flights = flights)
 
-# TODO: Staff adds new airplane in the system
+# Staff adds new airplane in the system
 # Author: Yanglin Tao
-# test: pass
 '''
 He or she adds a new airplane, providing all the needed data, via forms. 
 The application should prevent unauthorized users from doing this action. In the confirmation page, 
@@ -905,8 +932,7 @@ def add_airplane():
 	else:
 		return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
 
-#################################################################################################################
-#TODO: Staff adds new airport in the system
+#Staff adds new airport in the system
 #Author: Justin Li
 @app.route('/add_airport', methods=['GET', 'POST'])
 def add_airport():
@@ -936,7 +962,7 @@ def add_airport():
 	else:
 		return render_template('staff_home.html', user_name = user_name)
 
-#TODO: Staff views the rating and comments of the flight, along with the average rating
+#Staff views the rating and comments of the flight, along with the average rating
 #Author: Justin Li
 @app.route('/view_rating', methods=['GET', 'POST'])
 def view_rating():
@@ -974,7 +1000,7 @@ def view_rating():
 		return render_template('staff_home.html', user_name = user_name)
 
 
-#TODO: Staff views the most frequent customer
+#Staff views the most frequent customer
 #Author: Justin Li
 @app.route('/frequent_customer', methods=['GET', 'POST'])
 def frequent_customer():
@@ -998,7 +1024,7 @@ def frequent_customer():
 	else:
 		return render_template('staff_home.html', user_name = user_name, airplanes = airplanes, flights = flights)
 
-#TODO: Staff views all flights of a customer
+#Staff views all flights of a customer
 #Author: Justin Li
 @app.route('/view_customer_flights', methods=['GET', 'POST'])
 def view_customer_flights():
@@ -1025,7 +1051,7 @@ def view_customer_flights():
 	else:
 		return render_template('staff_home.html', user_name = user_name, airplanes = airplanes, flights = flights)
 
-#TODO: Staff views reports
+#Staff views reports
 #Author: Justin Li
 @app.route('/view_reports', methods=['GET', 'POST'])
 def view_reports():
@@ -1063,7 +1089,7 @@ def view_reports():
 	else:
 		return render_template('staff_home.html', user_name = user_name)
 
-#TODO: Staff views earned revenue
+#Staff views earned revenue
 #Author: Justin Li
 @app.route('/view_revenue', methods=['GET', 'POST'])
 def view_revenue():
@@ -1089,7 +1115,7 @@ def view_revenue():
 	else:
 		return render_template('staff_home.html', user_name = user_name, airplanes = airplanes, flights = flights)
 
-#TODO: Staff logout
+#Staff logout
 #Author: Justin Li
 @app.route('/staff_logout', methods=['GET', 'POST'])
 def staff_logout():

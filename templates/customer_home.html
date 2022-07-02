@@ -46,7 +46,7 @@
         <th>Arrival date</th>
         <th>Arrival time</th>
         <th>Arrival airport</th>
-        <th>Price</th>
+        <th>Base price</th>
         {% for line in go_flights %}
         <tr>
             <td>{{line['airline_name']}}</td>
@@ -71,7 +71,7 @@
         <th>Arrival date</th>
         <th>Arrival time</th>
         <th>Arrival airport</th>
-        <th>Price</th>
+        <th>Base price</th>
         {% for line in return_flights %}
         <tr>
             <td>{{line['airline_name']}}</td>
@@ -103,6 +103,12 @@
         {% if invalidSearchError %}
         <p class="error"><strong>Error:</strong> {{invalidSearchError}}</p>
         {% endif %}
+        {% if dateError %}
+        <p class="error"><strong>Error:</strong> {{dateError}}</p>
+	    {% endif %}
+        {% if noGoError %}
+        <p class="error"><strong>Error:</strong> {{noGoError}}</p>
+	    {% endif %}
     </form>
     
     <form class=action action="/purchase_ticket" method="POST">

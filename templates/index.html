@@ -58,6 +58,12 @@
     Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD"/> &nbsp;
     Return date (for round trip): <input type="date" name = "return_date" placeholder="Return date: YYYY-MM-DD"/></br>
     <input type="submit" value = "Show all future flights" />
+    {% if dateError %}
+        <p class="error"><strong>Error:</strong> {{dateError}}</p>
+	{% endif %}
+    {% if noGoError %}
+        <p class="error"><strong>Error:</strong> {{noGoError}}</p>
+	{% endif %}
     {% if noReturnError %}
         <p class="error"><strong>Error:</strong> {{noReturnError}}</p>
 	{% endif %}

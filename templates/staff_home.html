@@ -62,6 +62,9 @@
     {% if noPlaneError %}
         <p class="error"><strong>Error:</strong> {{noPlaneError}}</p>
     {% endif %}
+    {% if pastFlightError %}
+        <p class="error"><strong>Error:</strong> {{pastFlightError}}</p>
+    {% endif %}
     {% if addFlightSucc %}
         <p class="message">{{addFlightSucc}}</p>
     {% endif %}
