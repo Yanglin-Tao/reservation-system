@@ -68,14 +68,20 @@
     {% if addFlightSucc %}
         <p class="message">{{addFlightSucc}}</p>
     {% endif %}
+    {% if departureDateError %}
+        <p class="error"><strong>Error:</strong> {{departureDateError}}</p>
+    {% endif %}
+    {% if sameAirportError %}
+        <p class="error"><strong>Error:</strong> {{sameAirportError}}</p>
+    {% endif %}
 </form>
 
 <form class = action action="/change_status" method="POST">
     Flight number: <input type="number" name = "flight_number" placeholder="Flight number" required/> &nbsp;
     Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> </br>
     Departure time: <input type="time" name = "departure_time" placeholder="Departure time: hh:mm:ss" required/> &nbsp;
-    Airline name：<input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
-    Flight status：<input type="text" name = "flight_status" placeholder="Flight status" required/> <br>
+    Airline name: <input type="text" name = "airline_name" placeholder="Airline name" required/> <br>
+    Flight status: <input type="text" name = "flight_status" placeholder="Flight status: on time/delayed" required/> <br>
     <input type="submit" value = "Change status of the flight" />
     {% if changeStatusError %}
         <p class="error"><strong>Error:</strong> {{changeStatusError}}</p>

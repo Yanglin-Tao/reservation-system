@@ -98,6 +98,9 @@ def general_show_flights():
 			else:
 				noGoError = 'Sorry, no trip found.'
 				return render_template('index.html', noGoError = noGoError)
+		elif dept_airport == "" and arri_airport == "" and dept_city != "" and arri_city != "":
+			invalidSearchError = 'Please enter only departure/arrival city or departure/arrival airport'
+			return render_template('index.html', invalidSearchError = invalidSearchError)
 		else:
 			invalidSearchError = 'Invalid data'
 			return render_template('index.html', invalidSearchError = invalidSearchError)
@@ -459,6 +462,9 @@ def customer_search_flights():
 			else:
 				noGoError = 'Sorry, no trip found.'
 				return render_template('customer_home.html', noGoError = noGoError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+		elif dept_airport == "" and arri_airport == "" and dept_city != "" and arri_city != "":
+			invalidSearchError = 'Please enter only departure/arrival city or departure/arrival airport'
+			return render_template('customer_home.html', invalidSearchError = invalidSearchError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 		else:
 			invalidSearchError = 'Invalid data'
 			return render_template('customer_home.html', invalidSearchError = invalidSearchError, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
@@ -818,14 +824,6 @@ def add_flight():
 		cursor.execute(query, (user_name))
 		data = cursor.fetchone()
 		airline = data['airline_name']
-		# check if the departure date is in the past
-		departure_date = datetime.datetime.strptime(dept_date, "%Y-%m-%d")
-		departure_time = datetime.datetime.strptime(dept_time, "%H:%M")
-		com_date = datetime.datetime.combine(departure_date.date(), departure_time.time())
-		now_date = datetime.datetime.now()
-		if com_date < now_date:
-			pastFlightError = 'Cannot create a flight in the past'
-			return render_template('staff_home.html', user_name = user_name, pastFlightError = pastFlightError, airplanes = airplanes, flights = flights)
 		# check if this is an existing flight
 		query = 'SELECT * FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
 		cursor.execute(query, (flight_num, dept_date, dept_time, airline))
@@ -834,21 +832,41 @@ def add_flight():
 			flightExistError = "This is an existing flight, try another"
 			return render_template('staff_home.html', user_name = user_name, flightExistError = flightExistError, airplanes = airplanes, flights = flights)
 		else:
-			# check if the airplane exist in the system
-			query = 'SELECT * FROM Airplane WHERE airplane_identification_number = %s AND airline_name = %s'
-			cursor.execute(query, (airplane_identifi_num, airline))
-			planeExist = cursor.fetchone()
-			if (planeExist):
-				query = 'INSERT INTO Flight (flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, arrival_time, airplane_identification_number, base_price, airline_name, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NULL)'
-				cursor.execute(query, (flight_num, dept_airport, dept_date, dept_time, arri_airport, arri_date, arri_time, airplane_identifi_num, b_price, airline))
-				conn.commit()
-				cursor.close()
-				addFlightSucc = "Sucessfully added a flight"
-				flights = default_view_30days()
-				return render_template('staff_home.html', user_name = user_name, addFlightSucc = addFlightSucc, airplanes = airplanes, flights = flights)
+			# check if departure and arrival airports are the same
+			if dept_airport == arri_airport:
+				sameAirportError = 'Departure airport and arrival airport cannot be the same'
+				return render_template('staff_home.html', user_name = user_name, sameAirportError = sameAirportError, airplanes = airplanes, flights = flights)
+			# check if departure_date and time < arrival_date and time exist in the system
+			dep_date = datetime.datetime.strptime(dept_date, "%Y-%m-%d")
+			dep_time = datetime.datetime.strptime(dept_time, "%H:%M")
+			com_date = datetime.datetime.combine(dep_date.date(), dep_time.time())
+			arr_date = datetime.datetime.strptime(arri_date, "%Y-%m-%d")
+			arr_time = datetime.datetime.strptime(arri_time, "%H:%M")
+			com_date2 = datetime.datetime.combine(arr_date.date(), arr_time.time())
+			now_date = datetime.datetime.now()
+			if(com_date < now_date):
+				pastFlightError = 'Cannot create a flight in the past'
+				return render_template('staff_home.html', user_name = user_name, pastFlightError = pastFlightError, airplanes = airplanes, flights = flights)
+			if(com_date < com_date2):
+				# check if the airplane exist in the system
+				query = 'SELECT * FROM Airplane WHERE airplane_identification_number = %s AND airline_name = %s'
+				cursor.execute(query, (airplane_identifi_num, airline))
+				planeExist = cursor.fetchone()
+				if (planeExist):
+					query = 'INSERT INTO Flight (flight_number, departure_airport, departure_date, departure_time, arrival_airport, arrival_date, arrival_time, airplane_identification_number, base_price, airline_name, flight_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NULL)'
+					cursor.execute(query, (flight_num, dept_airport, dept_date, dept_time, arri_airport, arri_date, arri_time, airplane_identifi_num, b_price, airline))
+					conn.commit()
+					cursor.close()
+					addFlightSucc = "Sucessfully added a flight"
+					flights = default_view_30days()
+					return render_template('staff_home.html', user_name = user_name, addFlightSucc = addFlightSucc, airplanes = airplanes, flights = flights)
+				else:
+					noPlaneError = 'This is a new airplane. Please add to the system first or try another.'
+					return render_template('staff_home.html', user_name = user_name, noPlaneError = noPlaneError, airplanes = airplanes, flights = flights)
 			else:
-				noPlaneError = 'This is a new airplane. Please add to the system first or try another.'
-				return render_template('staff_home.html', user_name = user_name, noPlaneError = noPlaneError, airplanes = airplanes, flights = flights)
+				departureDateError = 'Departure date time can not be greater than arrival date time. Please check again.'
+				return render_template('staff_home.html', user_name = user_name, departureDateError = departureDateError, airplanes = airplanes, flights = flights)
+
 	else:
 		return render_template('staff_home.html', user_name = user_name, airplanes = airplanes, flights = flights)
 
