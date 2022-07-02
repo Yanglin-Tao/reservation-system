@@ -861,7 +861,7 @@ def add_flight():
 					flights = default_view_30days()
 					return render_template('staff_home.html', user_name = user_name, addFlightSucc = addFlightSucc, airplanes = airplanes, flights = flights)
 				else:
-					noPlaneError = 'This is a new airplane. Please add to the system first or try another.'
+					noPlaneError = 'No airplane found'
 					return render_template('staff_home.html', user_name = user_name, noPlaneError = noPlaneError, airplanes = airplanes, flights = flights)
 			else:
 				departureDateError = 'Departure date time can not be greater than arrival date time. Please check again.'
