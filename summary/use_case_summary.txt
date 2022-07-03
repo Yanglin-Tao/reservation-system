@@ -65,6 +65,10 @@ Description: Customer can see flight information which he/she purchased.
 query:
 SELECT * FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_date >= CURDATE()
 explanation: User table Ticket natural join with table flight, and show all the future flights the customer has. 
+query: SELECT * FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_date >= %s and departure_date <= %s and departure_airport = %s and arrival_airport = %s
+explanation: search by start/end date and departure/arrival airport
+query: SELECT * FROM Ticket NATURAL JOIN Flight, Airport D, Airport A WHERE customer_email = %s AND Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date >= %s AND departure_date <= %s
+explanation: search by start/end date and source/destination city
 
 use case: /customer_search_flights
 author: Tianzuo Liu
@@ -80,13 +84,13 @@ use case: /purchase_ticket
 author: Tianzuo Liu
 description: Customer chooses a flight and purchases a ticket for this flight, providing all the needed data, via forms. You may find it easier to implement this along with a use case to search for flights.
 query:
-SELECT * FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s
+SELECT * FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s AND departure_date > CURRENT_DATE()
 explanation: Customer choose a flight first
-SELECT base_price FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s
+SELECT base_price FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s AND departure_date > CURRENT_DATE()
 explanation: and if this flight is valid, then check the base_price of the flight. 
-SELECT COUNT(ticket_ID) FROM Ticket NATURAL JOIN Airplane NATURAL JOIN Flight WHERE flight_number = %s
+SELECT COUNT(ticket_ID) FROM Ticket NATURAL JOIN Airplane NATURAL JOIN Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s
 explanation: and then check how many tickets the airline sold. 
-SELECT number_seats FROM Flight NATURAL JOIN Airplane WHERE flight_number = %s
+SELECT number_seats FROM Flight NATURAL JOIN Airplane WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s
 explanation: then check how many seats the airline has. If 60% of the capacity is already booked/reserved for that flight, an extra 20% will be added with the minimum/base price. 
 INSERT INTO Ticket VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_DATE(), CURRENT_DATE(), %s, %s, %s, %s)
 explanation: Next, insert all the information for the Ticket table and make the customer purchase the ticket successfully if there is nothing wrong.
