@@ -122,10 +122,14 @@ def general_check_status():
 			cursor.execute(query, (airline, flight_num, dept_date, arri_date))
 			data = cursor.fetchall()	
 			cursor.close()
-			return render_template('index.html', status = data)
+			if (data):
+				return render_template('index.html', status = data)
+			else:
+				invalidFlightError = 'Sorry, no flight found'
+				return render_template('index.html', invalidFlightError = invalidFlightError)
 		else:
-			error = 'Invalid data'
-			return render_template('index.html', error=error)
+			invalidDataError = 'Invalid data'
+			return render_template('index.html', invalidDataError = invalidDataError)
 	else:
 		return render_template('index.html')
 
@@ -368,15 +372,44 @@ def customer_view_flights():
 	customer_email = session['customer_email']
 	total_last_year = spending_last_year()
 	spending = monthly_spending_last_year()
+	start = request.form['start_date']
+	end = request.form['end_date']
+	dept_airport = request.form['departure_airport']
+	arri_airport = request.form['arrival_airport']
+	dept_city = request.form['departure_city']
+	arri_city = request.form['arrival_city']
 	if request.method == 'POST':
-		query ='SELECT * FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_date >= CURDATE()'
-		cursor.execute(query, (session['customer_email']))
-		future_flights = cursor.fetchall()
-		if(future_flights):
-			return render_template('customer_home.html', future_flights = future_flights, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+		# default show all future flights
+		if start == "" and end == "" and dept_airport == "" and arri_airport == "" and dept_city == "" and arri_city == "":
+			query ='SELECT * FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_date >= CURDATE()'
+			cursor.execute(query, (session['customer_email']))
+			required_flights = cursor.fetchall()
+			if(required_flights):
+				return render_template('customer_home.html', required_flights = required_flights, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+			else:
+				no_future_error = 'No future flight'
+				return render_template('customer_home.html', no_future_error = no_future_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+		elif start != "" and end != "" and dept_airport != "" and arri_airport != "" and dept_city == "" and arri_city == "":
+			query ='SELECT * FROM Ticket NATURAL JOIN Flight WHERE customer_email = %s and departure_date >= %s and departure_date <= %s and departure_airport = %s and arrival_airport = %s'
+			cursor.execute(query, (session['customer_email'], start, end, dept_airport, arri_airport))
+			required_flights = cursor.fetchall()
+			if(required_flights):
+				return render_template('customer_home.html', required_flights = required_flights, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+			else:
+				no_flight_error = 'No flight found'
+				return render_template('customer_home.html', no_flight_error = no_flight_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+		elif start != "" and end != "" and dept_airport == "" and arri_airport == "" and dept_city != "" and arri_city != "":
+			query = 'SELECT * FROM Ticket NATURAL JOIN Flight, Airport D, Airport A WHERE customer_email = %s AND Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date >= %s AND departure_date <= %s'
+			cursor.execute(query, (session['customer_email'], dept_city, arri_city, start, end))
+			required_flights = cursor.fetchall()
+			if(required_flights):
+				return render_template('customer_home.html', required_flights = required_flights, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+			else:
+				no_flight_error = 'No flight found'
+				return render_template('customer_home.html', no_flight_error = no_flight_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 		else:
-			no_future_error = 'No future flight'
-		return render_template('customer_home.html', no_future_error = no_future_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
+			invalid_error = 'Invalid data'
+			return render_template('customer_home.html', invalid_error = invalid_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 	else:
 		return render_template('customer_home.html', customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 
@@ -478,6 +511,7 @@ def purchase_ticket():
 	cursor = conn.cursor()
 	total_last_year = spending_last_year()
 	spending = monthly_spending_last_year()
+	customer_email = session['customer_email']
 	if request.method == 'POST':
 		flight_number = request.form['flight_number']
 		dept_date = request.form['departure_date']
@@ -487,9 +521,8 @@ def purchase_ticket():
 		card_number = request.form['card_number']
 		expiration_date = request.form['expiration_date']
 		name_on_card = request.form['name_on_card']
-		customer_email = session['customer_email']
 		# check if the flight to purchase exists
-		query = 'SELECT * FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+		query = 'SELECT * FROM Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s AND departure_date > CURRENT_DATE()'
 		cursor.execute(query, (flight_number, dept_date, dept_time, airline_name))
 	
 		new_data = cursor.fetchone()
@@ -500,11 +533,11 @@ def purchase_ticket():
 			cursor.execute(query, (flight_number, dept_date, dept_time, airline_name))
 			data = cursor.fetchone()
 			# The sold price may be different from the base price. Handle the price increase mechanism.
-			query = 'SELECT COUNT(ticket_ID) FROM Ticket NATURAL JOIN Airplane NATURAL JOIN Flight WHERE flight_number = %s'
-			cursor.execute(query, (flight_number))
+			query = 'SELECT COUNT(ticket_ID) FROM Ticket NATURAL JOIN Airplane NATURAL JOIN Flight WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+			cursor.execute(query, (flight_number, dept_date, dept_time, airline_name))
 			count_num = cursor.fetchone()
-			query = 'SELECT number_seats FROM Flight NATURAL JOIN Airplane WHERE flight_number = %s'
-			cursor.execute(query, (flight_number))
+			query = 'SELECT number_seats FROM Flight NATURAL JOIN Airplane WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+			cursor.execute(query, (flight_number, dept_date, dept_time, airline_name))
 			num_seats = cursor.fetchone()
 			sold_price = data['base_price']
 
@@ -532,7 +565,7 @@ def purchase_ticket():
 			purchase_message = 'Successfully purchased ticket'
 			return render_template('customer_home.html', purchase_message = purchase_message, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 		else:
-			no_purchase_error = 'Something wrong. Please try again'
+			no_purchase_error = 'Invalid purchase. Please try again'
 			return render_template('customer_home.html', no_purchase_error = no_purchase_error, customer_email = customer_email, total_last_year = total_last_year, spending = spending)
 	else:
 		return render_template('customer_home.html', customer_email = customer_email, total_last_year = total_last_year, spending = spending)
@@ -651,14 +684,20 @@ def track_spending():
 		start = request.form['start_date']
 		end = request.form['end_date']
 		if start != "" and end != "":
+			if start > end:
+				startEndError = 'End date should be after the start date'
+				return render_template('customer_home.html', customer_email = email, spending = spending, total_last_year = total_last_year, startEndError = startEndError)
 			query = 'SELECT %s AS start_date, %s AS end_date, SUM(sold_price) AS total FROM Ticket NATURAL JOIN Customer WHERE customer_email = %s AND purchase_date >= %s AND purchase_date <= %s'
 			cursor.execute(query, (start, end, email, start, end))
 			# stores purchase date, sold_price in a given date range
 			spending = cursor.fetchall()
-		cursor.close()
-		return render_template('customer_home.html', customer_email = email, spending = spending, total_last_year = total_last_year)
+			cursor.close()
+			return render_template('customer_home.html', customer_email = email, spending = spending, total_last_year = total_last_year)
+		else:
+			emptyError = 'Invalid data'
+			return render_template('customer_home.html', emptyError = emptyError, customer_email = email, spending = spending, total_last_year = total_last_year)
 	else:
-		return render_template('customer_home.html', customer_email = email, total_last_year = total_last_year)
+		return render_template('customer_home.html', customer_email = email, spending = spending, total_last_year = total_last_year)
 
 # Customer logout
 # Author: Yanglin Tao
@@ -760,7 +799,7 @@ def staff_view_flights():
 		# arrival_airport, and arrival_city
 		if start == "" and end != "" and dept_airport == "" and arri_airport == "" and dept_city == "" and arri_city == "":
 			return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
-		if start != "" and end != "" and dept_airport != "" and arri_airport != "" and dept_city == "" and arri_city == "":
+		elif start != "" and end != "" and dept_airport != "" and arri_airport != "" and dept_city == "" and arri_city == "":
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight WHERE departure_date >= %s AND departure_date <= %s AND departure_airport = %s AND arrival_airport = %s AND airline_name = %s'
 			cursor.execute(query, (start, end, dept_airport, arri_airport, airline))
 			flights = cursor.fetchall()
@@ -782,6 +821,18 @@ def staff_view_flights():
 			query = 'SELECT flight_number, departure_date, departure_time, departure_airport, arrival_date, arrival_time, arrival_airport FROM Flight, Airport D, Airport A WHERE Flight.departure_airport = D.airport_name AND Flight.arrival_airport = A.airport_name AND D.airport_city = %s AND A.airport_city = %s AND departure_date >= %s AND departure_date <= %s AND airline_name = %s'
 			cursor.execute(query, (dept_city, arri_city, start, end, airline))
 			flights = cursor.fetchall()
+			for i in range(len(flights)):
+				flight_num = flights[i]['flight_number']
+				dept_date = flights[i]['departure_date']
+				dept_time = flights[i]['departure_time']
+				query = 'SELECT customer_email FROM Ticket WHERE flight_number = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s'
+				cursor.execute(query, (flight_num, dept_date, dept_time, airline))
+				customers = cursor.fetchall()
+				customer_list = []
+				for j in range(len(customers)):
+					customer_list.append(customers[j]['customer_email'])
+				customer_email_str = ", ".join(customer_list)
+				flights[i]['customer_email'] = customer_email_str
 			cursor.close()
 			return render_template('staff_home.html', user_name = user_name, flights = flights, airplanes = airplanes)
 		else:

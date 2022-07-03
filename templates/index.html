@@ -93,8 +93,11 @@
     Departure date: <input type="date" name = "departure_date" placeholder="Departure date: YYYY-MM-DD" required/> &nbsp;
     Arrival date: <input type="date" name = "arrival_date" placeholder="Arrival date: YYYY-MM-DD" required/></br>
     <input type="submit" value = "Check flight status" />
-    {% if error %}
-		<p class="error"><strong>Error:</strong> {{error}}</p>
+    {% if invalidDataError %}
+		<p class="error"><strong>Error:</strong> {{invalidDataError}}</p>
+	{% endif %}
+    {% if invalidFlightError %}
+		<p class="error"><strong>Error:</strong> {{invalidFlightError}}</p>
 	{% endif %}
 </form>
 <br>

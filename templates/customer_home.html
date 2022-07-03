@@ -18,7 +18,7 @@
         <th>Arrival date</th>
         <th>Arrival time</th>
         <th>Arrival airport</th>
-        {% for line in future_flights %}
+        {% for line in required_flights %}
         <tr>
             <td>{{line['airline_name']}}</td>
             <td>{{line['flight_number']}}</td>
@@ -32,9 +32,23 @@
         {% endfor %}
     </table>
     <form class=action action="/customer_view_flights" method="POST">
+        <p class='center'>Search by Departure/Arrival Airport</p>
+        Departure airport: <input type="text" name="departure_airport" placeholder="Departure airport" /> &nbsp;
+        Arrival airport: <input type="text" name="arrival_airport" placeholder="Arrival airport" /> <br>
+        <p class='center'>Search by Departure/Arrival City</p>
+        Departure city: <input type="text" name="departure_city" placeholder="Departure city" /> &nbsp;
+        Arrival city: <input type="text" name="arrival_city" placeholder="Arrival city" /></br>
+        From: <input type="date" name="start_date" placeholder="Start date: YYYY-MM-DD" /> &nbsp;
+        To: <input type="date" name="end_date" placeholder="End date: YYYY-MM-DD" /> <br>
         <input type="submit" value="View my flights" />
         {% if no_future_error %}
         <p class="error"><strong>Error:</strong> {{no_future_error}}</p>
+        {% endif %}
+        {% if no_flight_error %}
+        <p class="error"><strong>Error:</strong> {{no_flight_error}}</p>
+        {% endif %}
+        {% if invalid_error %}
+        <p class="error"><strong>Error:</strong> {{invalid_error}}</p>
         {% endif %}
     </form>
     <table>
@@ -194,6 +208,13 @@
         From: <input type="date" name="start_date" placeholder="From: YYYY-MM-DD" /> &nbsp;
         To: <input type="date" name="end_date" placeholder="To: YYYY-MM-DD" /> <br>
         <input type="submit" value="Track my spending" />
+        {% if startEndError %}
+        <p class="error"><strong>Error:</strong> {{startEndError}}</p>
+        {% endif %}
+        {% if emptyError %}
+        <p class="error"><strong>Error:</strong> {{emptyError}}</p>
+        {% endif %}
+        
     </form>
     <form class=action action="/customer_logout">
         <input type="submit" value="Logout" />
